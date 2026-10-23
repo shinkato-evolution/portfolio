@@ -1,0 +1,198 @@
+{
+  "_note": "Textes validés par Tristan le 2026-10-21 (source : prod/textes-portails.md), modifiables à tout moment. Après modification : npm run gen (régénère index.html, projets/*.html, sitemap).",
+  "site": {
+    "url": "https://portfolio-jeu.netlify.app",
+    "_url_note": "[À VALIDER] remplacer par l'adresse réelle après la première mise en ligne, puis npm run build"
+  },
+  "projets": [
+    {
+      "id": "shinkato-app",
+      "titre": "Shinkatô — l'application",
+      "type": "Application mobile",
+      "pitch": "Une application mobile qui transforme les habitudes en aventure : on se renforce, on explore, on affronte ses obstacles. Publiée sur Google Play.",
+      "emblème": {
+        "nom": "Le Tantô",
+        "phrase": "Installer de bonnes habitudes et affronter nos propres obstacles qui les gênent."
+      },
+      "geste": "Trancher l'obstacle au tantô",
+      "video": "/media/shinkato-app.mp4",
+      "fiche": {
+        "idee": "Une application mobile qui transforme les habitudes en aventure : on se renforce, on explore, on affronte ses obstacles.",
+        "ma_part": "Conception du produit : systèmes de jeu, progression, narration, direction artistique. Production pilotée par agents IA, de la spécification au build Android. Communication automatisée : visuels, publications, programmation multi-réseaux.",
+        "outils": [
+          "Claude Code",
+          "React Native",
+          "Supabase",
+          "Obsidian",
+          "MuAPI",
+          "RobinReach",
+          "n8n"
+        ]
+      },
+      "statut": "Publiée (Google Play)",
+      "format": "vertical",
+      "a_quoi": "Installer de bonnes habitudes en les vivant comme une aventure : on se renforce, on explore, on affronte ses obstacles.",
+      "pour_qui": "Toute personne qui veut tenir ses habitudes, sur Android (Google Play)."
+    },
+    {
+      "id": "shinkato-site",
+      "titre": "Shinkatô — le site",
+      "type": "Site web",
+      "pitch": "Un site vitrine d'une seule page où l'on essaie l'application au lieu de lire sa description.",
+      "emblème": {
+        "nom": "Le Parchemin",
+        "phrase": "On ne lit pas Shinkatô, on y joue."
+      },
+      "geste": "Dérouler le parchemin",
+      "video": "/media/shinkato-site.mp4",
+      "fiche": {
+        "idee": "Un site vitrine d'une seule page où l'on essaie l'application au lieu de lire sa description.",
+        "ma_part": "Conception de la page et des démos jouables (territoire, combat de phrases, parchemin). Textes et direction artistique, dans la charte Shinkatô. Fabrication pilotée par agents IA, sans dépendance à installer ni traceur.",
+        "outils": [
+          "Claude Code",
+          "HTML",
+          "CSS",
+          "JavaScript"
+        ]
+      },
+      "statut": "Publié",
+      "format": "paysage",
+      "a_quoi": "Présenter l'application en la faisant essayer : le territoire, le combat de phrases, le parchemin.",
+      "pour_qui": "Les futurs joueurs, avant d'installer l'application."
+    },
+    {
+      "id": "sphere-ball",
+      "titre": "Sphère Ball",
+      "type": "Jeu vidéo",
+      "pitch": "Un duel en un contre un, entre Pong et sport fantastique : renvoyer une orbe magique dans le portail adverse.",
+      "emblème": {
+        "nom": "L'Orbe",
+        "phrase": "Elle revient toujours plus vite."
+      },
+      "geste": "Tirer et relâcher l'orbe",
+      "video": "/media/sphere-ball.mp4",
+      "fiche": {
+        "idee": "Un duel en un contre un, entre Pong et sport fantastique : renvoyer une orbe magique dans le portail adverse.",
+        "ma_part": "Game design : règles du duel, coup d'envoi, combattants et pouvoirs. Direction artistique et prompts des planches de personnages et d'interface. Pilotage de l'IA pour le code Godot, le trailer et une cinématique sous Blender.",
+        "outils": [
+          "Godot",
+          "Claude Code",
+          "Blender",
+          "Hyperframes",
+          "MuAPI"
+        ]
+      },
+      "statut": "Prototype jouable (contre l'ordinateur, clavier et manette)",
+      "format": "paysage",
+      "a_quoi": "Un duel un contre un, entre Pong et sport fantastique : renvoyer l'orbe magique dans le portail adverse.",
+      "pour_qui": "Joueurs d'action, seul contre l'ordinateur (clavier ou manette)."
+    },
+    {
+      "id": "licorne-nuages",
+      "titre": "Licorne dans les nuages",
+      "type": "Jeu vidéo",
+      "pitch": "Un jeu de vol pour les enfants de 4 à 6 ans, où chaque mission fait travailler couleurs, formes, lettres et mots.",
+      "emblème": {
+        "nom": "L'Œuf des nuages",
+        "phrase": "Chaque mission réussie fait naître un ami."
+      },
+      "geste": "Maintenir pour souffler les nuages",
+      "video": "/media/licorne-nuages.mp4",
+      "fiche": {
+        "idee": "Un jeu de vol pour les enfants de 4 à 6 ans, où chaque mission fait travailler couleurs, formes, lettres et mots.",
+        "ma_part": "Conception pour un enfant : missions, œufs et créatures, familles qui ouvrent de nouveaux décors. Prompts des planches d'images et préparation automatique des images pour le jeu. Pilotage de l'IA pour le code Godot et les tests.",
+        "outils": [
+          "Godot",
+          "Claude Code",
+          "Python",
+          "Hyperframes",
+          "MuAPI"
+        ]
+      },
+      "statut": "Prototype jouable",
+      "format": "paysage",
+      "a_quoi": "Voler, réussir des missions de couleurs, de formes, de lettres et de mots, faire éclore des œufs.",
+      "pour_qui": "Enfants de 4 à 6 ans."
+    },
+    {
+      "id": "jardin-fleuri",
+      "titre": "Mon Jardin Fleuri",
+      "type": "Jeu vidéo",
+      "pitch": "Un jeu de jardinage pour les 7-12 ans, sans punition, où les fleurs poussent en temps réel.",
+      "emblème": {
+        "nom": "L'Arrosoir",
+        "phrase": "Ici, rien ne fane : tout attend ton retour."
+      },
+      "geste": "Arroser les graines",
+      "video": "/media/jardin-fleuri.mp4",
+      "fiche": {
+        "idee": "Un jeu de jardinage pour les 7-12 ans, sans punition, où les fleurs poussent en temps réel.",
+        "ma_part": "Game design bienveillant : rien ne meurt, une soif par étape, balades et herbier. Prompts des images (style gouache de livre jeunesse) et intégration automatique dans le jeu. Pilotage de l'IA pour le code Godot et les tests.",
+        "outils": [
+          "Godot",
+          "Claude Code",
+          "Python",
+          "Hyperframes",
+          "MuAPI"
+        ]
+      },
+      "statut": "Prototype jouable",
+      "format": "paysage",
+      "a_quoi": "Cueillir, planter, arroser : les fleurs poussent en temps réel, sans jamais rien perdre.",
+      "pour_qui": "Enfants de 7 à 12 ans."
+    },
+    {
+      "id": "vortex-arena",
+      "titre": "Vortex Arena",
+      "type": "Jeu vidéo",
+      "pitch": "Un jeu de combat de toupies en 3D : on assemble sa toupie, on la lance au bon moment, on pousse l'adversaire dans le vide.",
+      "emblème": {
+        "nom": "Le Lanceur",
+        "phrase": "Le combat commence au lancer."
+      },
+      "geste": "Tirer la ficelle du lanceur",
+      "video": "/media/vortex-arena.mp4",
+      "fiche": {
+        "idee": "Un jeu de combat de toupies en 3D : on assemble sa toupie, on la lance au bon moment, on pousse l'adversaire dans le vide.",
+        "ma_part": "Game design : arène en cuvette, pièces qui changent l'équilibre, cartes payées en cristaux, tournoi. Direction artistique cel shading façon anime, univers original. Pilotage de l'IA pour le code Godot et les modèles 3D sous Blender, par scripts.",
+        "outils": [
+          "Godot",
+          "Blender",
+          "Claude Code",
+          "Hyperframes"
+        ]
+      },
+      "statut": "Prototype jouable (tranche jouable en cours)",
+      "format": "paysage",
+      "a_quoi": "Assembler sa toupie, la lancer au bon moment, pousser l'adversaire dans le vide.",
+      "pour_qui": "Joueurs de combat et de tournoi (ordinateur, clavier ou manette)."
+    },
+    {
+      "id": "mecha",
+      "titre": "Mecha Fighter",
+      "type": "Jeu vidéo",
+      "pitch": "Piloter un méca depuis son cockpit, en vue à la première personne, avec un mode marche et un mode visée.",
+      "emblème": {
+        "nom": "Le Contact",
+        "phrase": "Le méca vu de la place du pilote."
+      },
+      "geste": "Maintenir deux touches pour allumer le cockpit",
+      "video": "/media/mecha.mp4",
+      "fiche": {
+        "idee": "Piloter un méca depuis son cockpit, en vue à la première personne, avec un mode marche et un mode visée.",
+        "ma_part": "Conception des commandes et des deux modes, réglages entre simulation et arcade. Direction artistique du cockpit (anime cel shading) et prompts des images. Pilotage de l'IA pour le code Godot et le décor 3D construit par script sous Blender.",
+        "outils": [
+          "Godot",
+          "Blender",
+          "Claude Code",
+          "Python",
+          "Hyperframes"
+        ]
+      },
+      "statut": "En cours (prototype jouable)",
+      "format": "paysage",
+      "a_quoi": "Piloter un méca depuis son cockpit, en marche ou en visée.",
+      "pour_qui": "Fans de mécas et de pilotage en vue à la première personne."
+    }
+  ]
+}

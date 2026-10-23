@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.netlify/
+.vercel/
+__pycache__/
+*.pyc
+.DS_Store

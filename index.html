@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tristan Gonçalves — Créateur d'expériences ludiques, Niveau 16</title>
+<meta name="description" content="Portfolio jouable de Tristan Gonçalves : sept projets (application Shinkatô publiée sur Google Play, site, jeux Godot) à parcourir comme un niveau de jeu, ou à lire en version texte.">
+<link rel="canonical" href="https://portfolio-jeu.netlify.app/">
+<meta name="theme-color" content="#f6f3ec">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Créateur d'expériences ludiques — Niveau 16">
+<meta property="og:description" content="Sept projets à traverser comme un niveau de jeu. Tristan Gonçalves.">
+<meta property="og:locale" content="fr_FR">
+<script>
+  // Avant tout rendu : bascule no-js → js et applique la préférence « Réduire les animations ».
+  (function () {
+    // Le portfolio se parcourt de haut en bas : à l'actualisation, on repart toujours du début.
+    try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+    var h = document.documentElement;
+    h.classList.remove('no-js'); h.classList.add('js');
+    // Le bouton « Réduire les animations » n'existe plus : on oublie l'ancien choix mémorisé et on suit uniquement le réglage du système.
+    try { localStorage.removeItem('reduire-animations'); } catch (e) {}
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) h.classList.add('reduit');
+  })();
+</script>
+<link rel="stylesheet" href="/src/style.css">
+<!-- JSONLD:DEBUT -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://portfolio-jeu.netlify.app/#site",
+      "url": "https://portfolio-jeu.netlify.app/",
+      "name": "Créateur d'expériences ludiques — Niveau 16",
+      "inLanguage": "fr",
+      "dateModified": "2026-10-21",
+      "author": {
+        "@id": "https://portfolio-jeu.netlify.app/#tristan"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://portfolio-jeu.netlify.app/#tristan",
+      "name": "Tristan Gonçalves",
+      "jobTitle": "Créateur d'expériences ludiques",
+      "description": "Conçoit des expériences de jeu et les produit en pilotant l'IA générative.",
+      "email": "mailto:goncalves.tristan@yahoo.fr",
+      "url": "https://portfolio-jeu.netlify.app/",
+      "sameAs": [
+        "https://www.linkedin.com/in/tristan-goncalves-956854103/"
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Castillon-Savès",
+        "addressRegion": "Occitanie",
+        "addressCountry": "FR"
+      },
+      "knowsLanguage": [
+        "fr",
+        "en"
+      ]
+    },
+    {
+      "@type": "CreativeWork",
+      "@id": "https://portfolio-jeu.netlify.app/projets/shinkato-app.html#oeuvre",
+      "name": "Shinkatô — l'application",
+      "genre": "Application mobile",
+      "abstract": "Une application mobile qui transforme les habitudes en aventure : on se renforce, on explore, on affronte ses obstacles. Publiée sur Google Play.",
+      "url": "https://portfolio-jeu.netlify.app/projets/shinkato-app.html",
+      "creator": {
+        "@id": "https://portfolio-jeu.netlify.app/#tristan"
+      },
+      "inLanguage": "fr"
+    },
+    {
+      "@type": "CreativeWork",
+      "@id": "https://portfolio-jeu.netlify.app/projets/shinkato-site.html#oeuvre",
+      "name": "Shinkatô — le site",
+      "genre": "Site web",
+      "abstract": "Un site vitrine d'une seule page où l'on essaie l'application au lieu de lire sa description.",
+      "url": "https://portfolio-jeu.netlify.app/projets/shinkato-site.html",
+      "creator": {
+        "@id": "https://portfolio-jeu.netlify.app/#tristan"
+      },
+      "inLanguage": "fr"
+    },
+    {
+      "@type": "CreativeWork",
+      "@id": "https://portfolio-jeu.netlify.app/projets/sphere-ball.html#oeuvre",
+      "name": "Sphère Ball",
+      "genre": "Jeu vidéo",
+      "abstract": "Un duel en un contre un, entre Pong et sport fantastique : renvoyer une orbe magique dans le portail adverse.",
+      "url": "https://portfolio-jeu.netlify.app/projets/sphere-ball.html",
+      "creator": {
+        "@id": "https://portfolio-jeu.netlify.app/#tristan"
+      },
+      "inLanguage": "fr"
+    },
+    {
+      "@type": "CreativeWork",
+      "@id": "https://portfolio-jeu.netlify.app/projets/licorne-nuages.html#oeuvre",
+      "name": "Licorne dans les nuages",
+      "genre": "Jeu vidéo",
+      "abstract": "Un jeu de vol pour les enfants de 4 à 6 ans, où chaque mission fait travailler couleurs, formes, lettres et mots.",
+      "url": "https://portfolio-jeu.netlify.app/projets/licorne-nuages.html",
+      "creator": {
+        "@id": "https://portfolio-jeu.netlify.app/#tristan"
+      },
+      "inLanguage": "fr"
+    },
+    {
+      "@type": "CreativeWork",
+      "@id": "https://portfolio-jeu.netlify.app/projets/jardin-fleuri.html#oeuvre",
+      "name": "Mon Jardin Fleuri",
+      "genre": "Jeu vidéo",
+      "abstract": "Un jeu de jardinage pour les 7-12 ans, sans punition, où les fleurs poussent en temps réel.",
+      "url": "https://portfolio-jeu.netlify.app/projets/jardin-fleuri.html",
+      "creator": {
+        "@id": "https://portfolio-jeu.netlify.app/#tristan"
+      },
+      "inLanguage": "fr"
+    },
+    {
+      "@type": "CreativeWork",
+      "@id": "https://portfolio-jeu.netlify.app/projets/vortex-arena.html#oeuvre",
+      "name": "Vortex Arena",
+      "genre": "Jeu vidéo",
+      "abstract": "Un jeu de combat de toupies en 3D : on assemble sa toupie, on la lance au bon moment, on pousse l'adversaire dans le vide.",
+      "url": "https://portfolio-jeu.netlify.app/projets/vortex-arena.html",
+      "creator": {
+        "@id": "https://portfolio-jeu.netlify.app/#tristan"
+      },
+      "inLanguage": "fr"
+    },
+    {
+      "@type": "CreativeWork",
+      "@id": "https://portfolio-jeu.netlify.app/projets/mecha.html#oeuvre",
+      "name": "Mecha Fighter",
+      "genre": "Jeu vidéo",
+      "abstract": "Piloter un méca depuis son cockpit, en vue à la première personne, avec un mode marche et un mode visée.",
+      "url": "https://portfolio-jeu.netlify.app/projets/mecha.html",
+      "creator": {
+        "@id": "https://portfolio-jeu.netlify.app/#tristan"
+      },
+      "inLanguage": "fr"
+    }
+  ]
+}
+</script>
+<!-- JSONLD:FIN -->
+<script type="module" src="/src/main.ts"></script>
+</head>
+
+<body>
+<button type="button" class="btn-son" id="btn-son" aria-label="Couper le son" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="hp" d="M4 9v6h4l5 4V5L8 9H4Z"/><path class="onde" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="barre-mute" d="M16 9l6 6M22 9l-6 6"/></svg></button>
+<a class="evitement" href="/lire.html">Aller à la version texte</a>
+<p class="toast-verrou" id="toast-verrou" role="status" aria-live="polite"></p>
+
+<header class="barre" id="barre">
+  <nav class="barre-gauche" aria-label="Rubriques du portfolio">
+    <a href="/lire.html#projets" data-rubrique="projets">Projets</a>
+    <a href="/lire.html#qui" data-rubrique="0">Qui je suis</a>
+    <a href="/lire.html#parcours" data-rubrique="1">Parcours</a>
+  </nav>
+  <div class="barre-centre">
+    <h1 class="barre-titre">
+      <a href="/" aria-label="Portfolio de Tristan Gonçalves, créateur d'expériences ludiques, Niveau 16">
+        <span class="ornement" aria-hidden="true"></span><span class="portfolio">Portfolio</span><span class="ornement" aria-hidden="true"></span>
+      </a>
+    </h1>
+    <p class="barre-sous">Tristan Gonçalves · <span class="niveau">Créateur d'expériences ludiques — Niveau 16</span></p>
+  </div>
+  <div class="barre-droite">
+    <nav aria-label="Rubriques du portfolio (suite)">
+      <a href="/lire.html#outils" data-rubrique="2">Outils</a>
+      <a href="/lire.html#methode" data-rubrique="3">Méthode</a>
+      <a href="/lire.html#contact" data-rubrique="4">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<section class="jeu js-seul" id="jeu" aria-label="Le chemin des portails, version jouable">
+  <div class="jeu-scene">
+    <div class="intro-reve" id="intro-reve">
+      <p class="intro-texte">Passe à côté de tes rêves et tu tomberas dans le vide.</p>
+      <div class="intro-choix">
+        <button type="button" class="bouton-reve" id="btn-phase1v2"><span class="br-etoile" aria-hidden="true"></span><span class="br-texte">Vivre mon parcours</span><span class="br-etoile" aria-hidden="true"></span></button>
+      </div>
+    </div>
+    <div class="bandeau" id="bandeau">
+      <div class="hud-haut" aria-live="polite" aria-atomic="true">
+        <p class="hud-compteur"><span id="hud-compteur">1/7</span> <span class="hud-statut" id="hud-statut"></span></p>
+        <p class="hud-titre" id="hud-titre">Shinkatô — l'application</p>
+        <p class="hud-embleme"><span id="hud-embleme"></span> <span class="hud-phrase" id="hud-phrase"></span></p>
+      </div>
+      <div class="orbe" id="orbe" aria-hidden="true"><video id="orbe-video" muted loop playsinline preload="none" tabindex="-1"></video></div>
+      <aside class="fiche-portail" id="fiche-portail" aria-hidden="true" data-lenis-prevent>
+        <p class="fiche-type"><span id="fp-type"></span> · <span id="fp-statut"></span></p>
+        <h2 id="fp-titre"></h2>
+        <p class="fiche-ligne"><b>À quoi ça sert ?</b><span id="fp-sert"></span></p>
+        <p class="fiche-ligne"><b>Pour qui ?</b><span id="fp-public"></span></p>
+        <ul class="fiche-outils" id="fp-outils"></ul>
+        <button type="button" class="fiche-plus" id="fp-plus" aria-expanded="false">Voir plus</button>
+        <div class="fiche-extra" id="fp-extra">
+          <p class="fiche-ligne"><b>L'idée</b><span id="fp-idee"></span></p>
+          <p class="fiche-ligne"><b>Ma part</b><span id="fp-part"></span></p>
+          <p class="fiche-ligne"><b>Tous les outils</b><span id="fp-tous"></span></p>
+        </div>
+      </aside>
+      <button type="button" class="bouton-carre fleche fleche-g" id="btn-prec" aria-label="Portail précédent">‹</button>
+      <button type="button" class="bouton-carre fleche fleche-d" id="btn-suiv" aria-label="Portail suivant">›</button>
+      <div class="invite" id="invite">
+        <button type="button" class="bouton-entrer" id="btn-entrer">Entrer</button>
+        <span class="invite-aide" aria-hidden="true">ou Entrée</span>
+      </div>
+      <p class="hud-aide">Défiler pour avancer · <kbd>←</kbd> <kbd>→</kbd> portails · <kbd>Entrée</kbd> pour entrer</p>
+      <p class="etat-hero" id="etat-hero" aria-hidden="true">attente</p>
+      <section class="autres" id="autres" aria-hidden="true">
+        <h2>Et bien d'autres</h2>
+        <div class="autres-grille">
+          <figure><video id="autres-v1" src="/media/autres-1.mp4" muted loop playsinline preload="none"></video><figcaption>Magnet Coop</figcaption></figure>
+          <figure><video id="autres-v2" src="/media/autres-2.mp4" muted loop playsinline preload="none"></video><figcaption>One Blade</figcaption></figure>
+          <figure><video id="autres-v3" src="/media/autres-3.mp4" muted loop playsinline preload="none"></video><figcaption>The Fishing Day</figcaption></figure>
+        </div>
+      </section>
+      <div class="recul" id="recul" aria-live="polite"><p>Attention, vous revenez sur vos pas</p><i><b id="recul-jauge"></b></i></div>
+      <div class="decouverte" id="decouverte" aria-live="polite"><small>Nouvelle découverte</small><strong id="decouverte-texte"></strong></div>
+      <div class="indice-scroll" id="indice-scroll" aria-hidden="true"><span class="is-souris"><i></i></span><span class="is-fleches"></span><em>Fais défiler</em></div>
+      <p class="message-futur" id="message-futur" aria-live="polite">Le futur est rempli de projets…<em>À toi d'en être digne.</em></p>
+      <p class="fin-chemin" id="fin-chemin" aria-hidden="true">Fin du chemin</p>
+    </div>
+  </div>
+</section>
+
+<dialog class="scene-portail" id="scene-portail" aria-labelledby="scene-titre">
+  <div class="scene-contenu">
+    <p class="scene-compteur" id="scene-compteur"></p>
+    <h2 class="scene-titre" id="scene-titre"></h2>
+    <p class="scene-embleme" id="scene-embleme"></p>
+    <p class="scene-note">Scène provisoire : la scène immersive (vidéo, voix, geste) arrive au jalon J3.</p>
+    <div class="scene-actions">
+      <button type="button" class="bouton-entrer" id="scene-sortir">Sortir du portail</button>
+      <a class="lien" id="scene-fiche" href="#lire">Lire la fiche</a>
+    </div>
+  </div>
+</dialog>
+
+<noscript>
+  <section class="bloc">
+    <h2>Portfolio jouable</h2>
+    <p>Ce portfolio se parcourt comme un jeu et demande JavaScript. <a class="lien" href="/lire.html">Lire la version texte</a>.</p>
+  </section>
+</noscript>
+
+<section class="fin-reduit bloc js-seul">
+  <h2>Animations réduites</h2>
+  <p>Le parcours jouable est désactivé. Tout le contenu est dans la version texte.</p>
+  <p><a class="lien" href="/lire.html">Lire la version texte complète</a></p>
+</section>
+
+
+<footer class="barre-bas">
+  <p class="bb-nom">Tristan Gonçalves</p>
+  <p class="bb-centre">Portfolio · Niveau 16</p>
+  <p class="bb-liens">
+    <span>Mis à jour le <time datetime="2026-10-21">21 octobre 2026</time></span>
+    <a href="/mentions-legales.html">Mentions légales</a>
+    <a href="/lire.html">Version texte</a>
+  </p>
+</footer>
+</body>
+</html>

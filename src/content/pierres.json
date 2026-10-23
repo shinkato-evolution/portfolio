@@ -1,0 +1,147 @@
+{
+  "_note": "Texte des pierres runiques de l'acte 2 (source : prod/textes-portails.md, validé le 2026-10-21). Modifiable ici. Chaque pierre : un titre, des paragraphes (p), des lignes (li) et des liens (liens).",
+  "pierres": [
+    {
+      "id": "qui",
+      "titre": "Qui je suis ?",
+      "p": [
+        "Je m'appelle **Tristan**. J'ai d'abord fait **jouer** les gens en vrai : je créais les salles de mon **escape game**, les énigmes, le rythme d'une partie. J'ai étudié la **psychologie**.",
+        "Aujourd'hui je conçois des **jeux** et des **applications**, et je **pilote l'IA** de l'idée au livrable qui tourne. Ce qui m'intéresse : ce qu'un **jeu change** chez celui qui y joue.",
+        "J'aime créer des **expériences ludiques** qui favorisent l'**apprentissage** et qui me permettent d'exprimer ma **créativité**."
+      ]
+    },
+    {
+      "id": "parcours",
+      "titre": "Parcours",
+      "li": [
+        "**Gérant d'un escape game.** La création des salles (scénarios, énigmes, décors, rythme de partie) et toute l'entreprise autour.",
+        "**Shinkatô — fondateur, produit et IA.** Une application de développement personnel gamifiée, conçue et produite seul en pilotant des agents IA, publiée sur **Google Play**.",
+        "**Certifications (formations CPF).** **IA générative** (texte, image, vidéo, bases sur les LLM, automatisation), **community management** et **montage vidéo**."
+      ],
+      "p": [
+        "L'escape game m'a appris à **faire jouer**. La psychologie, à comprendre **pourquoi on continue**. Shinkatô **réunit les deux**."
+      ]
+    },
+    {
+      "id": "outils",
+      "titre": "Outils",
+      "outils": [
+        {
+          "nom": "Claude Code",
+          "icone": "claude"
+        },
+        {
+          "nom": "Obsidian",
+          "icone": "obsidian"
+        },
+        {
+          "nom": "Poppy AI",
+          "logo": "poppy"
+        },
+        {
+          "nom": "RobinReach",
+          "logo": "robinreach"
+        },
+        {
+          "nom": "MuAPI",
+          "logo": "muapi"
+        },
+        {
+          "nom": "n8n",
+          "icone": "n8n"
+        },
+        {
+          "nom": "Supabase",
+          "icone": "supabase"
+        },
+        {
+          "nom": "Canva",
+          "logo": "canva"
+        },
+        {
+          "nom": "Google Sheets",
+          "icone": "googlesheets"
+        },
+        {
+          "nom": "Godot",
+          "icone": "godotengine"
+        },
+        {
+          "nom": "Blender",
+          "icone": "blender"
+        },
+        {
+          "nom": "ChatGPT",
+          "mono": "GPT"
+        },
+        {
+          "nom": "Vocallab",
+          "mono": "VL"
+        },
+        {
+          "nom": "Hyperframes",
+          "mono": "HF"
+        }
+      ],
+      "sections": [
+        {
+          "titre": "Second cerveau · RAG avec Claude Code",
+          "p": [
+            "Une base de connaissances (**Obsidian**, **Poppy AI**) qui sert de contexte à mes agents : **Claude Code** y puise pour travailler comme moi."
+          ]
+        },
+        {
+          "titre": "Mes 5 préférés",
+          "li": [
+            "**Claude Code** — mon agent : il écrit, teste et organise les projets avec moi.",
+            "**Obsidian** — mon coffre de notes : toute ma base de connaissances en fichiers liés.",
+            "**Poppy AI** — je lui donne des vidéos et des documents, puis je l'interroge.",
+            "**RobinReach** — il programme et publie mes posts sur les réseaux.",
+            "**MuAPI** — il génère mes images et mes vidéos par IA."
+          ]
+        },
+        {
+          "titre": "Aussi",
+          "li": [
+            "**Godot** — le moteur de mes jeux.",
+            "**Blender** — mes décors et mes modèles 3D.",
+            "**Hyperframes** — je monte mes vidéos et mes trailers.",
+            "**n8n** — j'automatise mes tâches et mes publications.",
+            "**Supabase** — la base de données et les comptes de mes projets.",
+            "**Canva** — mes visuels et mes maquettes.",
+            "**Google Sheets** — mes tableaux de suivi.",
+            "**ChatGPT** — idées, textes et images.",
+            "**Vocallab** — ma voix, transformée en texte."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "methode",
+      "titre": "Méthode",
+      "li": [
+        "**Piloter** — des agents IA, de la demande au livrable qui tourne.",
+        "**Structurer** — une base de connaissances qui sert de contexte aux agents.",
+        "**Créer** — textes, visuels et vidéos générés, dans une identité tenue.",
+        "**Automatiser** — workflows, données, publications programmées."
+      ]
+    },
+    {
+      "id": "contact",
+      "titre": "Contact",
+      "p": [
+        "Tu as un **jeu**, une **appli** ou une **idée** qui doit donner envie de jouer ? Grave ton message ici. Je te réponds."
+      ],
+      "liens": [
+        {
+          "texte": "Écrire un e-mail",
+          "href": "mailto:goncalves.tristan@yahoo.fr"
+        },
+        {
+          "texte": "LinkedIn — Tristan Gonçalves",
+          "href": "https://www.linkedin.com/in/tristan-goncalves-956854103/"
+        }
+      ]
+    }
+  ]
+}
