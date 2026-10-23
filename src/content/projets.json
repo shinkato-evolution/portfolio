@@ -1,7 +1,7 @@
 {
   "_note": "Textes validés par Tristan le 2026-10-21 (source : prod/textes-portails.md), modifiables à tout moment. Après modification : npm run gen (régénère index.html, projets/*.html, sitemap).",
   "site": {
-    "url": "https://portfolio-jeu.netlify.app",
+    "url": "https://shinkato-evolution.github.io/portfolio",
     "_url_note": "[À VALIDER] remplacer par l'adresse réelle après la première mise en ligne, puis npm run build"
   },
   "projets": [
@@ -15,7 +15,7 @@
         "phrase": "Installer de bonnes habitudes et affronter nos propres obstacles qui les gênent."
       },
       "geste": "Trancher l'obstacle au tantô",
-      "video": "/media/shinkato-app.mp4",
+      "video": "media/shinkato-app.mp4",
       "fiche": {
         "idee": "Une application mobile qui transforme les habitudes en aventure : on se renforce, on explore, on affronte ses obstacles.",
         "ma_part": "Conception du produit : systèmes de jeu, progression, narration, direction artistique. Production pilotée par agents IA, de la spécification au build Android. Communication automatisée : visuels, publications, programmation multi-réseaux.",
@@ -44,7 +44,7 @@
         "phrase": "On ne lit pas Shinkatô, on y joue."
       },
       "geste": "Dérouler le parchemin",
-      "video": "/media/shinkato-site.mp4",
+      "video": "media/shinkato-site.mp4",
       "fiche": {
         "idee": "Un site vitrine d'une seule page où l'on essaie l'application au lieu de lire sa description.",
         "ma_part": "Conception de la page et des démos jouables (territoire, combat de phrases, parchemin). Textes et direction artistique, dans la charte Shinkatô. Fabrication pilotée par agents IA, sans dépendance à installer ni traceur.",
@@ -70,7 +70,7 @@
         "phrase": "Elle revient toujours plus vite."
       },
       "geste": "Tirer et relâcher l'orbe",
-      "video": "/media/sphere-ball.mp4",
+      "video": "media/sphere-ball.mp4",
       "fiche": {
         "idee": "Un duel en un contre un, entre Pong et sport fantastique : renvoyer une orbe magique dans le portail adverse.",
         "ma_part": "Game design : règles du duel, coup d'envoi, combattants et pouvoirs. Direction artistique et prompts des planches de personnages et d'interface. Pilotage de l'IA pour le code Godot, le trailer et une cinématique sous Blender.",
@@ -97,7 +97,7 @@
         "phrase": "Chaque mission réussie fait naître un ami."
       },
       "geste": "Maintenir pour souffler les nuages",
-      "video": "/media/licorne-nuages.mp4",
+      "video": "media/licorne-nuages.mp4",
       "fiche": {
         "idee": "Un jeu de vol pour les enfants de 4 à 6 ans, où chaque mission fait travailler couleurs, formes, lettres et mots.",
         "ma_part": "Conception pour un enfant : missions, œufs et créatures, familles qui ouvrent de nouveaux décors. Prompts des planches d'images et préparation automatique des images pour le jeu. Pilotage de l'IA pour le code Godot et les tests.",
@@ -124,7 +124,7 @@
         "phrase": "Ici, rien ne fane : tout attend ton retour."
       },
       "geste": "Arroser les graines",
-      "video": "/media/jardin-fleuri.mp4",
+      "video": "media/jardin-fleuri.mp4",
       "fiche": {
         "idee": "Un jeu de jardinage pour les 7-12 ans, sans punition, où les fleurs poussent en temps réel.",
         "ma_part": "Game design bienveillant : rien ne meurt, une soif par étape, balades et herbier. Prompts des images (style gouache de livre jeunesse) et intégration automatique dans le jeu. Pilotage de l'IA pour le code Godot et les tests.",
@@ -151,7 +151,7 @@
         "phrase": "Le combat commence au lancer."
       },
       "geste": "Tirer la ficelle du lanceur",
-      "video": "/media/vortex-arena.mp4",
+      "video": "media/vortex-arena.mp4",
       "fiche": {
         "idee": "Un jeu de combat de toupies en 3D : on assemble sa toupie, on la lance au bon moment, on pousse l'adversaire dans le vide.",
         "ma_part": "Game design : arène en cuvette, pièces qui changent l'équilibre, cartes payées en cristaux, tournoi. Direction artistique cel shading façon anime, univers original. Pilotage de l'IA pour le code Godot et les modèles 3D sous Blender, par scripts.",
@@ -177,7 +177,7 @@
         "phrase": "Le méca vu de la place du pilote."
       },
       "geste": "Maintenir deux touches pour allumer le cockpit",
-      "video": "/media/mecha.mp4",
+      "video": "media/mecha.mp4",
       "fiche": {
         "idee": "Piloter un méca depuis son cockpit, en vue à la première personne, avec un mode marche et un mode visée.",
         "ma_part": "Conception des commandes et des deux modes, réglages entre simulation et arcade. Direction artistique du cockpit (anime cel shading) et prompts des images. Pilotage de l'IA pour le code Godot et le décor 3D construit par script sous Blender.",

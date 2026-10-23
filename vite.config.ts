@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -9,7 +9,18 @@ const projets = Object.fromEntries(
     .map((f) => [`projets/${f.replace('.html', '')}`, resolve(import.meta.dirname, 'projets', f)]),
 );
 
+// Le site est publié dans un sous-dossier (GitHub Pages : /portfolio/). SITE_BASE le donne au moment de la construction ; en local, la racine suffit.
+const base = process.env.SITE_BASE ?? '/';
+
+// Vite préfixe lui-même les images, vidéos et scripts, mais pas les liens <a href="/..."> : on les complète ici.
+const liensAvecBase: Plugin = {
+  name: 'liens-avec-base',
+  transformIndexHtml: (html) => (base === '/' ? html : html.replace(/(<a[^>]*?\shref=")\/(?!\/)/g, `$1${base}`)),
+};
+
 export default defineConfig({
+  base,
+  plugins: [liensAvecBase],
   build: {
     target: 'es2020',
     rollupOptions: {

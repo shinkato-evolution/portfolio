@@ -501,7 +501,7 @@ function majOrbe(proche: number, devant: boolean, x: number, haut: number) {
     if (proche !== orbeIndex) {
       orbeIndex = proche;
       if (annoncer(`p${proche}`, CATEGORIES[proche] ?? pr.type)) son.jouer('cristal', 0.2, 1.15); // le petit son : seulement à la découverte, pas quand on revient en arrière
-      orbeVideo.src = pr.video;
+      orbeVideo.src = `${import.meta.env.BASE_URL}${pr.video}`;
       orbeVideo.load();
       remplirFiche(pr);
     }

@@ -23,7 +23,7 @@ export class ScenePortail {
     document.getElementById('scene-compteur')!.textContent = `Portail ${index + 1}/${total}`;
     document.getElementById('scene-titre')!.textContent = projet.titre;
     document.getElementById('scene-embleme')!.textContent = `${projet.emblème.nom} — ${projet.emblème.phrase}`;
-    (document.getElementById('scene-fiche') as HTMLAnchorElement).href = `/projets/${projet.id}.html`;
+    (document.getElementById('scene-fiche') as HTMLAnchorElement).href = `${import.meta.env.BASE_URL}projets/${projet.id}.html`;
     this.dialog.showModal();
     document.getElementById('scene-sortir')!.focus();
   }
