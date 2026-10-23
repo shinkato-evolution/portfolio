@@ -3,9 +3,7 @@
 // Ce module ne gère que l'image et les textes de la scène ; main.ts décide de ce qui se passe avant et après.
 import * as THREE from 'three';
 import { gsap } from 'gsap';
-import { Dragon3D } from './dragon3d';
 import { son } from '../son';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { POSITIONS_PORTAILS } from '../act1/chemin';
 
 const IMG = `${import.meta.env.BASE_URL}sprites/`;
@@ -18,22 +16,6 @@ const COULEURS_PORTAILS = [0, 1, 0, 1, 0, 1, 0];
 const RATIO_INTERIEUR = 0.65; // rayon intérieur de l'anneau / rayon extérieur (mesuré sur les images)
 /** Mouvements de l'anneau runique, en tours (positif = vers la gauche) : [déplacement, durée du mouvement, pause après]. */
 const MOUVEMENTS_ANNEAU: [number, number, number][] = [[0.07, 0.9, 1.0], [-0.25, 1.2, 1.1], [0.5, 1.7, 1.3], [0.25, 1.2, 1.5]];
-/** Décor de roche du vol : 'grotte' = les blocs de la phase 2 (même géométrie, même texture, même matériau) ; 'scans' = modèles Poly Haven. */
-const STYLE_ROCHE: 'grotte' | 'scans' = 'grotte';
-/** Dragon vu du dos : 'trois' = modèle 3D construit en code (dragon3d.ts), 'marionnette' = pièces à plat articulées, 'images' = 6 images à plat. */
-const DRAGON_MODE = 'aucun' as 'aucun' | 'trois' | 'marionnette' | 'images'; // 'aucun' : vue à la première personne comme en phase 2, on ne voit pas le dragon
-/** Oiseaux, petits dragons, cascades, brumes, fleurs, pétales : désactivés (ils traversaient les rochers et n'étaient pas beaux). */
-const AVEC_VIE = false;
-const DRAGON_MARIONNETTE = DRAGON_MODE === 'marionnette';
-/** Pièces du dragon marionnette (tailles des images en px ; points d'articulation et d'alignement en fractions de l'image). L'aile dessinée est la GAUCHE, pivot à l'épaule en bas à droite ; la droite en est le miroir. */
-const M_CORPS = [813, 1133], M_AILE = [1106, 1187], M_MAIN = [596, 523];
-const P_EPAULE = [0.929, 0.965];     // dans l'aile : l'épaule
-const EPAULE_CORPS = [0.05, 0.8];    // sur le corps : l'épaule gauche (la droite est symétrique)
-const CEINTURE_CORPS = 0.466;        // sur le corps : hauteur de la ceinture du harnais
-const SANGLE_MAIN = 0.222;           // sur la main : hauteur de la sangle
-const ZOOM_CORPS = 0.72;             // hauteur du corps en hauteurs d'écran (> 1 : le bas du dragon est hors cadre)
-const HAUT_CEINTURE = 0.93;          // la ceinture est à cette hauteur de l'écran
-const ECHELLE_AILE = 1.3, ECHELLE_MAIN = 0.62;
 const DUREE_PUITS = 3.4; // secondes de chute dans le puits
 const MAINS_TENDUES = true; // `main-droite-1..3.webp` : main droite qui se tend vers l'intérieur puis attrape
 const COTE_PORTAIL = 12.5, RAYON_PORTAIL = 5.5, HAUT_PORTAIL = 9, DECALAGE_DRAGON = 3;
@@ -56,9 +38,6 @@ export class PhaseV2 {
   private magie = document.createElement('div');
   private mains: HTMLImageElement[] = [];
   private anim = document.createElement('div'); private images: HTMLImageElement[] = []; private cases: HTMLElement[] = [];
-  private vue = document.createElement('div'); private vueImages: HTMLImageElement[] = []; private vueActive = -1;
-  private dragon3d = new Dragon3D();
-  private mario = document.createElement('div'); private mAileG!: { racine: HTMLElement; aile: HTMLElement }; private mAileD!: { racine: HTMLElement; aile: HTMLElement }; private mCorps!: HTMLImageElement; private mMain!: HTMLImageElement;
   private tendues: HTMLImageElement[] = []; private mainsTendues = false;
   private orbeUi = document.createElement('div');
   private barre = document.createElement('i');
@@ -69,10 +48,9 @@ export class PhaseV2 {
   private mer!: THREE.Mesh; private tChute = 0; private portails: THREE.ShaderMaterial[] = [];
   private lignes!: THREE.LineSegments; private lignesDonnees: { x: number; y: number; z: number; l: number; v: number }[] = [];
   private etincelles!: THREE.Points; private etincellesPos!: Float32Array;
-  private dragon = new THREE.Group(); private dragonSp!: THREE.Sprite; private fond!: THREE.Mesh; private sauveur!: THREE.Sprite; private sauveurT = -1;
+  private dragon = new THREE.Group(); private fond!: THREE.Mesh; private sauveur!: THREE.Sprite; private sauveurT = -1;
   private fabrique!: (nom: string, largeur: number, ancre?: number) => THREE.Sprite;
   private portailsFx: { vortex: THREE.Sprite; anneau: THREE.Sprite; lueur: THREE.Sprite; base: number; etat: { angle: number }; phase: number }[] = [];
-  private assets: Record<string, { geo: THREE.BufferGeometry; mat: THREE.MeshStandardMaterial; l: number; h: number; p: number }> = {};
   private solVol = false; private para = { x: 0, y: 0 }; private vitLat = 0; private vitVert = 0; private dernier = { x: 0, y: 0 };
   private stations: Station[] = [];
   private cotes: number[] = [];
@@ -95,17 +73,12 @@ export class PhaseV2 {
     const charge = new THREE.TextureLoader();
     const v2 = (n: string) => `${IMG}v2/${n}.webp`;
     const noms: [string, string][] = [['sol-chute', `${IMG}sol-chute.webp`], ['panorama', v2('panorama')]];
-    for (let i = 1; i <= 17; i++) noms.push([`haut-${i}`, v2(`haut-${i}`)]);
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 17, 18, 19]) noms.push([`montagne-${i}`, v2(`montagne-${i}`)]);
-    for (let i = 0; i < 8; i++) noms.push([`dragon-${i}`, v2(`dragon-${i}`)]);
+    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17]) noms.push([`haut-${i}`, v2(`haut-${i}`)]);
     for (let i = 1; i <= 3; i++) { noms.push([`anneau-${i}`, v2(`anneau-${i}`)]); noms.push([`vortex-${i}`, v2(`vortex-${i}`)]); }
-    for (let i = 1; i <= 2; i++) noms.push([`roche-${i}`, v2(`roche-${i}`)]);
     noms.push(['grotte-roche', `${IMG}break/roche.webp`]);
-    for (let i = 1; i <= 36; i++) noms.push([`vie-${i}`, v2(`vie-${i}`)]);
     const textures = await Promise.all(noms.map(([, f]) => charge.loadAsync(f)));
     noms.forEach(([n], i) => { textures[i].colorSpace = THREE.SRGBColorSpace; this.tex[n] = textures[i]; });
-    for (const n of ['roche-1', 'roche-2', 'grotte-roche']) { const t = this.tex[n]; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; }
-    await this.chargerModeles();
+    { const t = this.tex['grotte-roche']; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; }
     this.interface();
     this.construireScene();
     window.addEventListener('resize', this.redim);
@@ -157,133 +130,6 @@ export class PhaseV2 {
     return this.eauMat;
   }
 
-  private matCommun: THREE.MeshStandardMaterial | null = null;
-  /** Matériau des rochers : les textures peintes (falaise, roche usée) projetées selon les trois axes dans l'espace du monde,
-   *  de la mousse verte sur les pentes douces en bas, de la neige en haut : comme les montagnes de ton panorama. Les UV des scans ne servent plus. */
-  private matRoche() {
-    if (this.matCommun) return this.matCommun;
-    const m = new THREE.MeshStandardMaterial({ color: 0xe4daf6, roughness: 1, metalness: 0, emissive: 0x6a5890, emissiveIntensity: 0.18, side: THREE.DoubleSide, map: this.tex['roche-1'], emissiveMap: this.tex['roche-2'] }); // les deux textures passent par les emplacements `map` et `emissiveMap` : three sait les lier
-    m.onBeforeCompile = (sh) => {
-      sh.vertexShader = sh.vertexShader
-        .replace('#include <common>', `#include <common>
-varying vec3 vWPos; varying vec3 vWN;`)
-        .replace('#include <project_vertex>', `#include <project_vertex>
-          vec4 wpos = vec4(transformed, 1.0);
-          vec3 wn = objectNormal;
-          #ifdef USE_INSTANCING
-            wpos = instanceMatrix * wpos; wn = mat3(instanceMatrix) * wn;
-          #endif
-          vWPos = (modelMatrix * wpos).xyz; vWN = normalize(mat3(modelMatrix) * wn);`);
-      sh.fragmentShader = sh.fragmentShader
-        .replace('#include <common>', `#include <common>
-          varying vec3 vWPos; varying vec3 vWN;
-          vec3 tri(sampler2D t, vec3 p, vec3 w, float sc) { return texture2D(t, p.zy * sc).rgb * w.x + texture2D(t, p.xz * sc).rgb * w.y + texture2D(t, p.xy * sc).rgb * w.z; }`)
-        .replace('#include <map_fragment>', `
-          vec3 n = normalize(vWN); vec3 w = pow(abs(n), vec3(4.0)); w /= (w.x + w.y + w.z);
-          vec3 a = tri(map, vWPos, w, 0.011); a = mix(a, tri(map, vWPos.zxy + 13.0, w, 0.0037), 0.45);
-          vec3 b = tri(emissiveMap, vWPos, w, 0.012);
-          vec3 col = mix(a, b, smoothstep(0.35, 0.75, n.y));
-          float mousse = smoothstep(0.45, 0.85, n.y) * (1.0 - smoothstep(-30.0, 30.0, vWPos.y));
-          col = mix(col, col * vec3(0.72, 1.05, 0.68) + vec3(0.02, 0.07, 0.0), mousse * 0.75);
-          float neige = smoothstep(0.35, 0.8, n.y) * smoothstep(40.0, 90.0, vWPos.y);
-          col = mix(col, vec3(0.96, 0.94, 1.0), neige);
-          diffuseColor.rgb *= col;`);
-    };
-    this.matCommun = m;
-    return m;
-  }
-
-  /** Les modèles Poly Haven allégés (public/models/v2/*.glb) : géométrie, matériau repeint en pastel, dimensions en mètres. */
-  private async chargerModeles() {
-    const ids = ['namaqualand_cliff_01', 'namaqualand_cliff_02', 'rock_face_01', 'rock_face_02', 'mountainside'];
-    const gl = new GLTFLoader();
-    const gltfs = await Promise.all(ids.map((id) => gl.loadAsync(`${import.meta.env.BASE_URL}models/v2/${id}.glb`)));
-    gltfs.forEach((g, i) => {
-      let mesh: THREE.Mesh | null = null;
-      g.scene.updateMatrixWorld(true);
-      g.scene.traverse((o) => { if (!mesh && (o as THREE.Mesh).isMesh) mesh = o as THREE.Mesh; });
-      const mm = mesh as unknown as THREE.Mesh;
-      const geo = mm.geometry.clone().applyMatrix4(mm.matrixWorld);
-      geo.computeBoundingBox();
-      const bb = geo.boundingBox as THREE.Box3;
-      const mat = this.matRoche();
-      this.assets[ids[i]] = { geo, mat, l: bb.max.x - bb.min.x, h: bb.max.y - bb.min.y, p: bb.max.z - bb.min.z };
-    });
-  }
-
-  // ---------- Dragon marionnette (vue de dos) : le corps (cou épais, harnais), une aile entière par côté (la droite est le miroir de la gauche), la main sur la sangle
-  private construireMario() {
-    const r = this.mario; r.className = 'v2-mario';
-    const img = (nom: string) => { const im = new Image(); im.src = `${IMG}v2/mario-${nom}.webp`; im.alt = ''; im.draggable = false; return im; };
-    const aile = (miroir: boolean) => {
-      const racine = document.createElement('div'); racine.className = 'v2-m-pt'; if (miroir) racine.style.transform = 'scaleX(-1)';
-      const el = document.createElement('div'); el.className = 'v2-m-pt'; const im = img('aile'); im.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%'; el.append(im); racine.append(el);
-      return { racine, aile: el };
-    };
-    this.mAileG = aile(false); this.mAileD = aile(true);
-    this.mCorps = img('corps'); this.mCorps.className = 'v2-m-pt'; this.mMain = img('main'); this.mMain.className = 'v2-m-pt v2-m-main';
-    r.append(this.mAileG.racine, this.mAileD.racine, this.mCorps, this.mMain);
-    this.mario.style.display = 'none';
-  }
-
-  /** Place les pièces. La marionnette est volontairement ZOOMÉE : le corps dépasse du bas de l'écran, les épaules sont hors cadre et les ailes sortent d'en bas ; seule la partie haute du dragon est visible. */
-  private miseEnPageMario() {
-    const W = this.hote.clientWidth, H = this.hote.clientHeight, k = (ZOOM_CORPS * H) / M_CORPS[1];
-    const bw = M_CORPS[0] * k, bh = M_CORPS[1] * k, gauche = W / 2 - bw / 2;
-    const ceinture = HAUT_CEINTURE * H, haut = ceinture - CEINTURE_CORPS * bh; // la ceinture du harnais se trouve à HAUT_CEINTURE de la hauteur d'écran
-    const place = (el: HTMLElement, x: number, y: number, w: number, h: number) => { el.style.left = `${x}px`; el.style.top = `${y}px`; el.style.width = `${w}px`; el.style.height = `${h}px`; };
-    place(this.mCorps, gauche, haut, bw, bh);
-    const kw = k * ECHELLE_AILE, aw = M_AILE[0] * kw, ah = M_AILE[1] * kw;
-    const monte = (a: { racine: HTMLElement; aile: HTMLElement }, ex: number, ey: number) => {
-      place(a.racine, ex, ey, 0, 0);
-      place(a.aile, -P_EPAULE[0] * aw, -P_EPAULE[1] * ah, aw, ah); a.aile.style.transformOrigin = `${P_EPAULE[0] * aw}px ${P_EPAULE[1] * ah}px`;
-    };
-    monte(this.mAileG, gauche + EPAULE_CORPS[0] * bw, haut + EPAULE_CORPS[1] * bh);
-    monte(this.mAileD, gauche + (1 - EPAULE_CORPS[0]) * bw, haut + EPAULE_CORPS[1] * bh);
-    // La main : sa sangle se superpose à la ceinture du harnais.
-    const hk = k * ECHELLE_MAIN, mw = M_MAIN[0] * hk, mh = M_MAIN[1] * hk;
-    place(this.mMain, W / 2 - mw / 2, ceinture - SANGLE_MAIN * mh, mw, mh);
-  }
-
-  // ---------- Éléments de vie : oiseaux, petits dragons, rapaces, cascades, brumes, fleurs, branches, pétales
-  private vie: { sp: THREE.Sprite; x0: number; y0: number; z: number; vx: number; bob: number; ph: number; plage: number }[] = [];
-  private ajouterVie() {
-    const r = hasard(909), L = LONGUEUR_VOL, BAS = -66;
-    const pt = (p: number) => ({ x: this.xChemin(p), y: this.yChemin(p), z: -p * L });
-    const cote = () => (r() < 0.5 ? -1 : 1);
-    const mettre = (idx: number, p: number, lat: number, dy: number, larg: number, o: { vx?: number; bob?: number; ancre?: number; opa?: number; y?: number; add?: boolean; plage?: number } = {}) => {
-      const c = pt(p), sp = this.fabrique(`vie-${idx}`, larg, o.ancre ?? 0.5);
-      const m = sp.material as THREE.SpriteMaterial; m.opacity = o.opa ?? 1; if (o.add) m.blending = THREE.AdditiveBlending;
-      const x = c.x + lat, y = o.y ?? (c.y + dy);
-      sp.position.set(x, y, c.z); this.grpVol.add(sp);
-      this.vie.push({ sp, x0: x, y0: y, z: c.z, vx: o.vx ?? 0, bob: o.bob ?? 0, ph: r() * 6.28, plage: o.plage ?? 120 });
-    };
-    const groupes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-    for (let i = 0; i < 20; i++) { // oiseaux : volées lointaines qui dérivent en volant
-      const k = groupes[Math.floor(r() * groupes.length)], gros = k === 4 || k === 5;
-      mettre(k, 0.03 + r() * 0.92, cote() * (26 + r() * 60), 6 + r() * 34, gros ? 28 + r() * 14 : 12 + r() * 10, { vx: (r() < 0.5 ? -1 : 1) * (2 + r() * 3), bob: 1.2 + r() * 1.5 });
-    }
-    for (let i = 0; i < 9; i++) { // petits dragons et rapaces, qui traversent de gauche à droite (ils regardent à droite)
-      mettre(13 + (i % 6), 0.05 + r() * 0.9, cote() * (45 + r() * 70), 12 + r() * 30, 28 + r() * 14, { vx: 5 + r() * 4, bob: 1.5, plage: 220 });
-    }
-    for (let i = 0; i < 5; i++) { // cascades posées au sol, loin sur les flancs
-      mettre(19 + (i % 4), 0.06 + r() * 0.88, cote() * (105 + r() * 40), 0, 90 + r() * 40, { ancre: 0, y: BAS - 3 });
-    }
-    for (let i = 0; i < 9; i++) { // brumes basses et voiles
-      mettre(23 + (i % 6), 0.03 + r() * 0.94, cote() * (20 + r() * 80), 0, 90 + r() * 60, { y: BAS + 8 + r() * 28, vx: (r() - 0.5) * 2, opa: 0.55, bob: 0.8, plage: 40 });
-    }
-    // Fleurs et branches accrochées aux parois (juste devant la face intérieure de la paroi).
-    for (let i = 0; i < 22; i++) {
-      const p = 0.04 + r() * 0.9, c = cote(), interieur = 34 + 8 * (0.5 + 0.5 * Math.sin(p * 41 + c * 1.7));
-      if (POSITIONS_PORTAILS.some((q) => Math.abs(q - p) < 0.05)) continue;
-      const branche = r() < 0.55;
-      mettre(branche ? 33 + Math.floor(r() * 3) : 29 + Math.floor(r() * 4), p, c * (interieur + 1.5), -4 + r() * 22, branche ? 10 + r() * 6 : 11 + r() * 6, { bob: 0.15 });
-    }
-    for (let i = 0; i < 12; i++) { // pétales lumineux qui flottent près de la route
-      mettre(36, 0.03 + r() * 0.93, cote() * (17 + r() * 12), -6 + r() * 16, 9 + r() * 5, { vx: (r() - 0.5) * 1.5, bob: 1.6, add: true, opa: 0.85 });
-    }
-  }
-
   // ---------- Interface (calques HTML par-dessus la scène)
   private interface() {
     const r = this.racine; r.className = 'v2'; r.setAttribute('aria-hidden', 'true');
@@ -296,8 +142,6 @@ varying vec3 vWPos; varying vec3 vWN;`)
       const im = new Image(); im.src = `${IMG}mains/main-ouverte.webp`; im.alt = ''; im.draggable = false; im.className = `v2-main v2-main-${cote}`;
       this.mains.push(im);
     }
-    this.vue.className = 'v2-vue';
-    for (let k = 1; k <= 6; k++) { const im = new Image(); im.src = `${IMG}v2/vue-dragon-${k}.webp`; im.alt = ''; im.draggable = false; this.vueImages.push(im); this.vue.append(im); }
     for (let k = 1; k <= 3; k++) { const im = new Image(); if (MAINS_TENDUES) im.src = `${IMG}v2/main-droite-${k}.webp`; this.tendues.push(im); }
     this.anim.className = 'v2-anim';
     for (let k = 1; k <= 5; k++) { const im = new Image(); im.src = `${IMG}v2/transition-${k}.webp`; im.alt = ''; im.draggable = false; this.images.push(im); const cs = document.createElement('div'); cs.className = 'v2-case'; cs.append(im); this.anim.append(cs); this.cases.push(cs); }
@@ -313,8 +157,7 @@ varying vec3 vWPos; varying vec3 vWN;`)
       e.style.setProperty('--dx', `${(Math.cos(a) * d).toFixed(1)}vmin`); e.style.setProperty('--dy', `${(Math.sin(a) * d).toFixed(1)}vmin`);
       this.magie.append(e);
     }
-    this.construireMario();
-    r.append(this.canvas, this.vue, this.mario, ...this.mains, this.anim, this.texte, this.orbeUi, this.magie, this.flash, this.yeux, this.noir, this.texteNoir);
+    r.append(this.canvas, ...this.mains, this.anim, this.texte, this.orbeUi, this.magie, this.flash, this.yeux, this.noir, this.texteNoir);
     this.hote.append(r);
   }
 
@@ -452,9 +295,7 @@ varying vec3 vWPos; varying vec3 vWN;`)
     this.construireRelief();
     this.construirePuits();
     this.construirePoussiere();
-    if (AVEC_VIE) this.ajouterVie();
     this.construireDragon();
-    if (DRAGON_MODE === 'trois') this.grpVol.add(this.dragon3d.groupe);
     this.grpVol.visible = false;
     this.scene.add(this.grpVol);
   }
@@ -473,14 +314,8 @@ varying vec3 vWPos; varying vec3 vWN;`)
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false })); s.scale.set(16, 8, 1); return s;
   }
 
-  /** Le dragon et son cavalier, vus de dos : une carte qui change de pose (battement, virages, plané, piqué). */
-  private construireDragon() {
-    const t = this.tex['dragon-0'], img = t.image as { width: number; height: number };
-    this.dragonSp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false, fog: false }));
-    this.dragonSp.scale.set(12, 12 * img.height / img.width, 1);
-    this.dragon.add(this.dragonSp);
-    this.grpVol.add(this.dragon);
-  }
+  /** Le point qui suit la route (le dragon n'est plus dessiné : on vole à la première personne, la caméra seule avance). */
+  private construireDragon() { this.grpVol.add(this.dragon); }
 
   private redim = () => {
     const W = this.hote.clientWidth, H = this.hote.clientHeight;
@@ -489,7 +324,6 @@ varying vec3 vWPos; varying vec3 vWN;`)
     this.camera.aspect = W / H; this.camera.updateProjectionMatrix();
     const h = 2 * 350 * Math.tan(THREE.MathUtils.degToRad(36)) * 1.3, w = Math.max(h * (2720 / 1536), h * this.camera.aspect);
     this.fond.scale.set(w, w * 1536 / 2720, 1);
-    this.miseEnPageMario();
   };
 
   // ---------- Séquence
@@ -569,7 +403,7 @@ varying vec3 vWPos; varying vec3 vWN;`)
       .call(() => {
         this.noir.style.display = 'none'; this.yeux.classList.add('ferme'); this.anim.style.display = 'none'; 
         this.mode = 'vol'; this.grpChute.visible = false; this.sol(); this.grpVol.visible = true; this.fond.visible = true; this.camera.fov = 72; this.camera.updateProjectionMatrix();
-        this.mains.forEach((m) => { m.style.display = 'none'; }); if (DRAGON_MODE === 'marionnette') { this.mario.style.display = 'block'; this.miseEnPageMario(); } else if (DRAGON_MODE === 'images') this.vue.style.display = 'block'; this.dragonSp.visible = false; this.hote.classList.remove('v2-chute'); this.hote.classList.add('v2-vol');
+        this.mains.forEach((m) => { m.style.display = 'none'; }); this.hote.classList.remove('v2-chute'); this.hote.classList.add('v2-vol');
       }, undefined, T + 0.4)
       .call(() => this.ouvrirYeux(), undefined, T + 0.45);
   }
@@ -642,103 +476,8 @@ varying vec3 vWPos; varying vec3 vWN;`)
     return { x: (v.x * 0.5 + 0.5) * this.hote.clientWidth, haut: (-v.y * 0.5 + 0.5) * this.hote.clientHeight, visible: profondeur > 6 };
   }
 
-  /** Décor de roche : les cinq modèles Poly Haven (CC0), allégés dans Blender, plantés dans le sol. Les falaises et flancs de montagne bordent le ciel de chaque côté, des piliers de roche
-   *  sont posés en quinconce de part et d'autre de la route : le dragon slalome entre eux. Rien ne flotte. Aucun bloc ne passe à moins de MARGE de la trace du dragon et de la caméra
-   *  (testé sur 27 points du volume de chaque bloc : trop près, il est repoussé vers l'extérieur, sinon retiré). */
-  private construireRelief() {
-    if (STYLE_ROCHE === 'grotte') { this.reliefGrotte(); return; }
-    const r = hasard(4242), L = LONGUEUR_VOL, BAS = -66, MARGE = 24;
-    const mobile = window.matchMedia('(max-width: 800px)').matches;
-    const prochePortail = (p: number, d = 0.045) => POSITIONS_PORTAILS.some((q) => Math.abs(q - p) < d);
-    const cotePortail = (p: number) => { let c = 0, dmin = 0.05; POSITIONS_PORTAILS.forEach((q, i) => { if (Math.abs(q - p) < dmin) { dmin = Math.abs(q - p); c = this.cotes[i]; } }); return c; };
-
-    // Trace du dragon et de la caméra.
-    const trace: THREE.Vector3[] = [];
-    for (let z = 40; z > -L - 60; z -= 1.8) {
-      const p = Math.min(1, Math.max(0, -z / L)), x = this.xChemin(p), y = this.yChemin(p), zz = -p * L;
-      trace.push(new THREE.Vector3(x, y, zz), new THREE.Vector3(x * 0.8, y + 2.5, zz + 12.5));
-    }
-    const grille: THREE.Vector3[] = [];
-    for (let a = -1; a <= 1; a++) for (let b = 0; b <= 2; b++) for (let c = -1; c <= 1; c++) grille.push(new THREE.Vector3(a, b / 2, c)); // 27 points de la boîte (b : 0 = base, 1 = sommet)
-    const pt = new THREE.Vector3();
-    interface Inst { id: string; x: number; z: number; ry: number; s: number }
-    const insts: Inst[] = [];
-    const ids = Object.keys(this.assets);
-    const boite = (i: Inst) => {
-      const a = this.assets[i.id]; return { w: a.l * i.s, h: a.h * i.s, d: a.p * i.s };
-    };
-    // Distance exacte entre un point et la boîte orientée du modèle (jamais plus approximative qu'un échantillonnage).
-    const distMin = (i: Inst) => {
-      const { w, h, d } = boite(i);
-      const c = Math.cos(i.ry), sn = Math.sin(i.ry), bas = BAS - 4, haut = bas + h;
-      const rayon = Math.max(w, d) * 0.75 + h * 0.2;
-      let m = 1e9;
-      for (const t of trace) {
-        if (Math.abs(t.z - i.z) > rayon + MARGE + 10 && Math.abs(t.x - i.x) > rayon + MARGE + 10) continue;
-        const dx = t.x - i.x, dz = t.z - i.z;
-        const lx = dx * c - dz * sn, lz = dx * sn + dz * c;
-        const ex = Math.max(Math.abs(lx) - w / 2, 0), ez = Math.max(Math.abs(lz) - d / 2, 0), ey = Math.max(t.y - haut, bas - t.y, 0);
-        m = Math.min(m, Math.hypot(ex, ey, ez));
-      }
-      return m;
-    };
-    const place = (id: string, x: number, z: number, haut: number) => {
-      const a = this.assets[id];
-      const inst: Inst = { id, x, z, ry: r() * Math.PI * 2, s: haut / a.h };
-      const p = Math.min(1, Math.max(0, -z / L)), centre = this.xChemin(p), sens = Math.sign(x - centre) || 1;
-      for (let k = 0; k < 10; k++) { if (distMin(inst) >= MARGE) { insts.push(inst); return true; } inst.x += sens * 4; }
-      return false;
-    };
-    const choisir = (l: string[]) => l[Math.floor(r() * l.length)];
-    const grands = ['mountainside', 'namaqualand_cliff_02', 'namaqualand_cliff_01'];
-    const moyens = ['rock_face_01', 'rock_face_02', 'namaqualand_cliff_01'];
-
-    // Rang lointain : flancs de montagne et grandes falaises, de chaque côté.
-    for (let z = 20; z > -L - 40; z -= mobile ? 150 : 100) {
-      for (const cote of [-1, 1]) {
-        const zz = z - r() * 40, p = Math.min(1, Math.max(0, -zz / L));
-        const portail = cotePortail(p);
-        place(choisir(grands), this.xChemin(p) + cote * (95 + r() * 55 + (portail === cote ? 30 : 0)), zz, 110 + r() * 80);
-      }
-    }
-    // Rang proche : falaises et rochers, en quinconce (jamais face à face), plus loin du côté des portails.
-    let cote = 1;
-    for (let z = -30; z > -L - 30; z -= mobile ? 110 : 75) {
-      cote = -cote;
-      const zz = z - r() * 20, p = Math.min(1, Math.max(0, -zz / L)), portail = cotePortail(p);
-      const lat = 40 + r() * 16 + (portail === cote ? 28 : 0);
-      if (!prochePortail(p, 0.03) || portail !== cote) place(choisir(moyens.concat(grands)), this.xChemin(p) + cote * lat, zz, 52 + r() * 36);
-    }
-    // Piliers de roche, du côté opposé au dernier : le dragon passe d'un côté à l'autre pour les contourner.
-    cote = -1;
-    for (let z = -60; z > -L; z -= mobile ? 120 : 90) {
-      cote = -cote;
-      const zz = z - r() * 25, p = Math.min(1, Math.max(0, -zz / L));
-      if (prochePortail(p, 0.04)) continue;
-      place(choisir(['rock_face_02', 'rock_face_01']), this.xChemin(p) + cote * (27 + r() * 6), zz, 34 + r() * 20);
-    }
-
-    // Un maillage instancié par modèle.
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), pos = new THREE.Vector3(), sc = new THREE.Vector3();
-    for (const id of ids) {
-      const liste = insts.filter((i) => i.id === id);
-      if (!liste.length) continue;
-      const a = this.assets[id];
-      const im = new THREE.InstancedMesh(a.geo, a.mat, liste.length);
-      liste.forEach((i, k) => { e.set(0, i.ry, 0); q.setFromEuler(e); pos.set(i.x, BAS - 4, i.z); sc.set(i.s, i.s, i.s); m.compose(pos, q, sc); im.setMatrixAt(k, m); });
-      im.frustumCulled = false;
-      this.grpVol.add(im);
-    }
-    // Montagnes peintes tout au fond, derrière le décor.
-    const peintes = [1, 2, 3, 4, 19];
-    for (let i = 0; i < 24; i++) {
-      const c = r() < 0.5 ? -1 : 1, hh = 170 + r() * 200, nom = `montagne-${peintes[Math.floor(r() * peintes.length)]}`;
-      const img = this.tex[nom].image as { width: number; height: number };
-      const s = this.fabrique(nom, hh * img.width / img.height, 0);
-      s.position.set(c * (260 + r() * 200), BAS - 60, 60 - r() * (L + 300)); (s.material as THREE.SpriteMaterial).opacity = 0.9; this.grpVol.add(s);
-    }
-    console.info(`[V2] relief : ${insts.length} modèles Poly Haven placés (marge ${MARGE})`);
-  }
+  /** Décor de roche du vol : les mêmes blocs que la grotte de la phase 2. */
+  private construireRelief() { this.reliefGrotte(); }
 
   /** Rochers de la phase 2 : les mêmes blocs que la grotte (icosaèdres aux angles vifs, `break/roche.webp`, teinte lilas, ombrage facetté), en parois continues de chaque côté de la route,
    *  plantées dans le sol, avec des ponts de pierre reliés aux deux parois. Marge de sécurité : aucun bloc à moins de MARGE du dragon ni de la caméra. */
@@ -974,38 +713,8 @@ varying vec3 vWPos; varying vec3 vWN;`)
       this.vitVert += (((this.lisse.y - this.dernier.y) / Math.max(dt, 0.001)) - this.vitVert) * Math.min(1, dt * 6);
       this.dernier = { x: this.lisse.x, y: this.lisse.y };
       this.dragon.position.set(x, y, z);
-      // Vue à la première personne : le dragon est une image fixée à l'écran (battement d'ailes en boucle) ; la caméra seule avance.
-      const dxdpLisse = this.vitLat * 6, dydpLisse = this.vitVert * 6; // vitesses (unités/s) mises à l'échelle des anciennes pentes
-      let bob = 0;
-      if (DRAGON_MARIONNETTE) {
-        // Battement : l'épaule monte et descend, l'avant-bras suit avec un léger retard (comme une vraie aile).
-        const w = tm * Math.PI * 2 * 2.3, angle = -4 + 20 * Math.sin(w), raccourci = 1 - 0.07 * (0.5 + 0.5 * Math.sin(w));
-        for (const a2 of [this.mAileG, this.mAileD]) a2.aile.style.transform = `rotate(${angle.toFixed(2)}deg) scaleX(${raccourci.toFixed(3)})`;
-        bob = -Math.sin(w) * 5;
-      } else {
-      // Cycle trié par hauteur d'aile (haut → bas → haut) : les images voisines se ressemblent, le fondu devient un vrai mouvement.
-        const ORDRE = [0, 5, 4, 2, 1, 3, 1, 2, 4, 5];
-        const ph = tm * 13, n = Math.floor(ph) % ORDRE.length, f = ORDRE[n], g = ORDRE[(n + 1) % ORDRE.length], mix = ph - Math.floor(ph);
-        const lisseMix = mix * mix * (3 - 2 * mix);
-        this.vueImages.forEach((im, i) => { const actif = i === f || i === g; im.style.display = actif ? 'block' : 'none'; im.style.opacity = i === f ? '1' : String(lisseMix); });
-        bob = -Math.cos((ph / ORDRE.length) * Math.PI * 2) * 7; // le corps monte quand les ailes descendent
-      }
-      const incl = Math.max(-5, Math.min(5, -this.vitLat * 0.35));
-      const posture = `translateY(${(bob + this.plongee * 55).toFixed(1)}px) rotate(${incl.toFixed(2)}deg)`;
-      if (DRAGON_MARIONNETTE) this.mario.style.transform = posture; else this.vue.style.transform = `translateX(-50%) ${posture}`;
-      for (const v of this.vie) { // éléments de vie : dérive lente, balancement ; les créatures qui sortent de leur plage reviennent de l'autre côté
-        let dx = v.vx * tm; if (v.vx) { const p = v.plage; dx = ((dx + p) % (2 * p) + 2 * p) % (2 * p) - p; }
-        v.sp.position.set(v.x0 + dx, v.y0 + Math.sin(tm * 0.9 + v.ph) * v.bob, v.z);
-      }
-      if (DRAGON_MODE === 'trois') {
-        // Vue à la place des yeux du cavalier : le dragon s'incline avec les virages et les montées, la caméra suit.
-        const inclinaison = new THREE.Euler(Math.max(-0.2, Math.min(0.2, dydpLisse * 0.004)) - this.plongee * 0.5, -dxdpLisse * 0.003, Math.max(-0.16, Math.min(0.16, -dxdpLisse * 0.005)), 'YXZ');
-        const oeil = new THREE.Vector3(x * 0.8 + sx, y + 2.5 + sy - this.plongee * 6, z + 12.5);
-        this.dragon3d.groupe.rotation.copy(inclinaison);
-        this.dragon3d.groupe.position.copy(oeil).sub(this.dragon3d.siege.clone().applyEuler(inclinaison));
-        this.dragon3d.battre(tm * Math.PI * 2 * 1.9, tm);
-        this.camera.position.copy(oeil); this.camera.rotation.copy(inclinaison); this.camera.rotateX(-0.12);
-      } else {
+      // Vue à la première personne : la caméra seule avance.
+      {
         // Traversée : la caméra file vers le centre du portail noir et le franchit.
         const zP = this.stations[this.stations.length - 1].z, k = this.plongee * this.plongee;
         // Le dos du dragon, sans le voir : un battement d'ailes lent qui fait monter et descendre la caméra, un léger tangage et un roulis qui respire (s'efface à la traversée).

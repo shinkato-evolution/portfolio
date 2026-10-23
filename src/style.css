@@ -429,21 +429,13 @@ kbd {
 .v2-case { position: absolute; inset: 14px; overflow: hidden; border: 5px solid #0b0b10; background: #0b0b10; box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.28); }
 .v2-case img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 50%; }
 
-.v2-vue { position: absolute; left: 50%; bottom: -9%; width: 118%; aspect-ratio: 1280 / 480; z-index: 2; display: none; pointer-events: none; transform: translateX(-50%);
-  /* Les ailes sont coupées par le bord de l'image générée : on fond ce bord pour qu'il ne se voie pas. */
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16%), linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 16%), linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%); -webkit-mask-composite: source-in; mask-composite: intersect; }
-.v2-vue img { position: absolute; inset: 0; width: 100%; height: 100%; display: none; }
 
 /* Appuyer vite et plusieurs fois ne doit rien sélectionner (l'écran prenait une teinte bleue de sélection). */
 .jeu-scene, .jeu-scene * { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 .jeu-scene ::selection { background: transparent; }
 
 /* Dragon marionnette : pièces entières posées à l'écran, articulées par le code */
-.v2-mario { position: absolute; inset: 0; z-index: 2; display: none; pointer-events: none; transform-origin: 50% 100%; }
-.v2-m-pt { position: absolute; transform-origin: 0 0; user-select: none; }
-.v2-mario img { -webkit-user-drag: none; }
 
-.v2-m-main { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%); }
 
 /* Fiche de projet : entrée animée, bouton « Voir plus », plus de bouton Entrer en Phase 1 V2 */
 .fiche-portail.visible { pointer-events: auto; }
