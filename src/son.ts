@@ -1,8 +1,8 @@
 // Sound design du portfolio : musique et effets (fichiers CC0, voir public/audio/CREDITS.md) + ambiances synthétisées (vent, torche, gouttes, battement de cœur).
 // Le son ne démarre qu'après un clic (règle des navigateurs) : `demarrer()` est appelé sur « Vivre mon parcours ». Un bouton permet de le couper ; le choix est mémorisé.
 const BASE = `${import.meta.env.BASE_URL}audio/`;
-const EFFETS = ['carte_jouee', 'ui_clic', 'cristal', 'elan', 'choc_fort', 'choc_fort2', 'chute', 'atterrissage', 'compte_tick', 'lancer_parfait'];
-const MUSIQUES = ['menu', 'tournoi'];
+const EFFETS = ['ui_clic', 'cristal', 'choc_fort', 'choc_fort2', 'chute', 'atterrissage', 'compte_tick'];
+const MUSIQUES = ['menu']; // « tournoi » (la grotte, 1,6 Mo) ne se charge qu'à l'approche de la grotte : voir precharger()
 
 class Son {
   private ctx: AudioContext | null = null; private master!: GainNode; private tampons: Record<string, AudioBuffer> = {};
@@ -39,6 +39,13 @@ class Son {
     this.pret = true;
   }
 
+  private chargements: Record<string, Promise<void>> = {};
+  /** Charge un son à la demande (une seule fois) : la musique de la grotte n'est téléchargée que si le visiteur s'en approche. */
+  precharger(nom: string): Promise<void> {
+    if (!this.ctx || this.tampons[nom]) return Promise.resolve();
+    return this.chargements[nom] ??= (async () => { try { const r = await fetch(`${BASE}${nom}.ogg`); this.tampons[nom] = await this.ctx!.decodeAudioData(await r.arrayBuffer()); } catch { /* un son manquant ne bloque rien */ } })();
+  }
+
   /** Joue un effet : volume, hauteur (1 = normale). */
   jouer(nom: string, volume = 0.8, hauteur = 1) {
     if (!this.ctx || !this.pret || !this.actif) return;
@@ -49,6 +56,7 @@ class Son {
   /** Musique de fond en boucle, avec fondu enchaîné ; `null` arrête la musique. */
   musique(nom: string | null, volume = 0.3, fondu = 2) {
     if (!this.ctx || !this.pret) return;
+    if (nom && !this.tampons[nom]) { void this.precharger(nom).then(() => this.musique(nom, volume, fondu)); return; } // pas encore chargée : on la charge, puis elle démarre
     const c = this.ctx, t = c.currentTime, cour = this.musiqueCourante;
     if (cour && cour.nom === nom) { cour.gain.gain.cancelScheduledValues(t); cour.gain.gain.linearRampToValueAtTime(volume, t + fondu); return; }
     if (cour) { cour.gain.gain.cancelScheduledValues(t); cour.gain.gain.setValueAtTime(cour.gain.gain.value, t); cour.gain.gain.linearRampToValueAtTime(0, t + fondu); const s = cour.src; window.setTimeout(() => { try { s.stop(); } catch { /* déjà arrêtée */ } }, fondu * 1000 + 100); }

@@ -238,6 +238,7 @@ function lancerFutur() {
   if (v2Actif) { bloque = true; yBloque = window.scrollY; chemin.suspendre(true); } // en V2 on fige là où l'on est : pas de saut vers le portail
   else verrouiller(true, chemin.yDuPortail(DERNIER));
   brisure.preparerGrotte();
+  void son.precharger('tournoi'); // la musique de la grotte se charge pendant la chute
   sequence?.kill();
   proxy.q = 0;
   if (v2Actif && v2) { // Phase 1 V2 : le dragon plonge devant le portail noir, puis on retrouve la chute classique jusqu'à la grotte
