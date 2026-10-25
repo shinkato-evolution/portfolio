@@ -96,7 +96,9 @@ document.addEventListener('click', (e) => {
   toastVerrou.textContent = `Adresse copiée : ${adresse}`; toastVerrou.classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toastVerrou.classList.remove('visible'), 4000);
 });
 const toastVerrou = $('toast-verrou'); let toastTimer: number | undefined;
-function direVerrou() { toastVerrou.textContent = "Vivez d'abord le parcours"; toastVerrou.classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toastVerrou.classList.remove('visible'), 2200); }
+function direVerrou(a?: HTMLElement) {
+  if (a) { const r = a.getBoundingClientRect(); toastVerrou.style.left = `${Math.round(Math.min(window.innerWidth - 150, Math.max(150, r.left + r.width / 2)))}px`; toastVerrou.style.top = `${Math.round(r.bottom + 10)}px`; } // sous la rubrique touchée
+  toastVerrou.textContent = "Vivez d'abord le parcours"; toastVerrou.classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toastVerrou.classList.remove('visible'), 2200); }
 const pied = document.querySelector('footer.barre-bas');
 if (pied && 'IntersectionObserver' in window) new IntersectionObserver((es) => { if (parcoursVu && es.some((e) => e.isIntersecting)) deverrouiller(); }, { threshold: 0.15 }).observe(pied);
 
@@ -440,7 +442,7 @@ function allerRubrique(cible: string) {
 }
 barre.addEventListener('click', (ev) => {
   const lien = (ev.target as HTMLElement).closest('a[data-rubrique]') as HTMLAnchorElement | null;
-  if (lien && verrouille && !reduit) { ev.preventDefault(); direVerrou(); return; }
+  if (lien && verrouille && !reduit) { ev.preventDefault(); direVerrou(lien); return; }
   if (!lien || reduit || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
   ev.preventDefault();
   allerRubrique(lien.dataset.rubrique as string);
@@ -506,6 +508,7 @@ function majOrbe(proche: number, devant: boolean, x: number, haut: number) {
     if (proche !== orbeIndex) {
       orbeIndex = proche;
       if (annoncer(`p${proche}`, CATEGORIES[proche] ?? pr.type)) son.jouer('cristal', 0.2, 1.15); // le petit son : seulement à la découverte, pas quand on revient en arrière
+      orbeVideo.muted = true; orbeVideo.defaultMuted = true;
       orbeVideo.src = `${import.meta.env.BASE_URL}${pr.video}`;
       orbeVideo.load();
       remplirFiche(pr);

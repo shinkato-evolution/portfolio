@@ -313,8 +313,8 @@ export class Grotte {
     }
     if (vue && proche !== this.pierreActive) { this.pierreActive = proche; this.remplirPanneau(proche); this.texteFerme = false; }
     if (!vue) { this.debutVue = 0; this.texteFerme = false; } else if (!this.debutVue) this.debutVue = performance.now();
-    // Téléphone : la rune reste seule à l'écran une seconde, puis le texte s'ouvre ; la croix le referme.
-    const telephone = this.hote.clientWidth <= 700, attendu = !telephone || performance.now() - this.debutVue > 1000;
+    // Téléphone : la rune reste seule à l'écran deux secondes, puis le texte s'ouvre ; la croix le referme.
+    const telephone = this.hote.clientWidth <= 700, attendu = !telephone || performance.now() - this.debutVue > 2000;
     this.panneau.classList.toggle('visible', vue && ti > 1.2 && attendu && !(telephone && this.texteFerme));
 
     // Torche : balancement à la marche, se lève vers la pierre quand on s'y arrête ; flamme qui danse, lumière qui pulse.

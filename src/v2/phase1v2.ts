@@ -367,7 +367,7 @@ export class PhaseV2 {
     // Même échelle que la main de départ (890 px de large à min(44vw, 64vh)), avant-bras qui sort du coin bas-droit.
     const f = Math.min(0.44 * this.hote.clientWidth, 0.64 * this.hote.clientHeight) / 890;
     m.style.width = `${((im.naturalWidth || 770) * f).toFixed(0)}px`;
-    m.style.left = 'auto'; m.style.right = '-1%'; m.style.bottom = '-15%'; // plus bas : la main tendue n'est plus coupée
+    m.style.left = 'auto'; m.style.right = '-1%'; m.style.bottom = '-15%'; // plus bas : la main tendue n'est plus coupée ; sur téléphone elle ne remonte pas avec les autres éléments, pour ne pas venir sur le bouton et la barre
   }
 
   /** Un appui sur le bouton : la barre se remplit, la scène tremble ; à la fin, les yeux se ferment. */
@@ -683,7 +683,8 @@ export class PhaseV2 {
       if (this.sauveurT >= 0) { // le grand dragon vient se placer à côté de nous
         this.sauveurT += dt;
         const k = Math.min(1, this.sauveurT / 3.4), e = 1 - Math.pow(1 - k, 3);
-        this.sauveur.position.set(70 + (12 - 70) * e + Math.sin(tm * 1.3) * 1.2, -48 + Math.sin(tm * 1.1) * 1.5, 8 + Math.sin(tm * 0.9) * 1.5);
+        const monteTel = this.hote.clientWidth <= 700 ? 64 * (2 * 48 * Math.tan(THREE.MathUtils.degToRad(36))) / this.hote.clientHeight : 0; // téléphone : le dragon remonte de 64 px à l'écran (la caméra regarde vers le bas : le haut de l'écran est -z)
+        this.sauveur.position.set(70 + (12 - 70) * e + Math.sin(tm * 1.3) * 1.2, -48 + Math.sin(tm * 1.1) * 1.5, 8 + Math.sin(tm * 0.9) * 1.5 - monteTel);
         (this.sauveur.material as THREE.SpriteMaterial).rotation = -0.18 * (1 - e) + Math.sin(tm * 0.8) * 0.03;
         this.sauveur.scale.x = 34 * (1 + 0.04 * Math.sin(tm * 6));
       }

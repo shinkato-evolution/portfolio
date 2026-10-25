@@ -651,7 +651,26 @@ html.barre-jeu-on .btn-son { display: inline-flex; }
 .pierre-fermer { display: none; }
 @media (max-width: 700px) {
   .pierre-fermer {
-    display: flex; align-items: center; justify-content: center; float: right; position: sticky; top: -9px; z-index: 2; width: 34px; height: 34px; margin: -9px -10px 4px 8px; /* 4 px du coin haut droit du cadre (bord compris) */ padding: 0;
+    display: flex; align-items: center; justify-content: center; float: right; position: sticky; top: -5px; z-index: 2; width: 34px; height: 34px; margin: -5px -7px 4px 8px; /* 8 px du coin haut droit du cadre (bord compris) */ padding: 0;
     border: 1px solid rgba(255, 210, 90, 0.8); border-radius: 8px; background: rgba(20, 10, 44, 0.9); color: #ffe39a; font: 400 1.45rem/1 var(--police); cursor: pointer;
   }
+}
+
+/* ---------- Téléphone, deuxième série de réglages ---------- */
+.mob-seul { display: none; }
+@media (max-width: 700px) {
+  .mob-seul { display: inline; }
+  /* En-tête : une seule ligne ; une rubrique sur deux change de couleur pour les distinguer ; le cadenas laisse la place (le message le dit au toucher) */
+  .barre { gap: 0; }
+  .barre-gauche, .barre-droite { flex: 0 0 auto; }
+  .barre nav { gap: 11px; }
+  .barre-gauche { margin-right: 11px; }
+  .barre nav a { font-size: clamp(0.5rem, 2.5vw, 0.66rem); letter-spacing: 0.02em; }
+  .barre nav a[data-rubrique="0"], .barre nav a[data-rubrique="2"], .barre nav a[data-rubrique="4"] { color: var(--accent); }
+  a[data-rubrique].verrou::before { display: none; }
+  a[data-rubrique].verrou { opacity: 0.62; }
+  .toast-verrou { max-width: 86vw; padding: 9px 14px; font-size: 0.7rem; letter-spacing: 0.08em; text-align: center; }
+  /* Chute : phrase, bouton, barre et mains remontés de 64 px */
+  .v2-orbe { bottom: calc(9% + 64px); }
+  .v2-main { bottom: calc(-19% + 64px); }
 }
