@@ -34,6 +34,7 @@ let v2Actif = false; // Phase 1 V2 : la scène 3D pilote l'image
 let v2Vol = false;   // la chute est finie : le défilement fait voler le dragon
 let v2Charge = false;
 const indiceScroll = document.getElementById('indice-scroll') as HTMLElement;
+if (window.matchMedia('(pointer: coarse)').matches) { const em = indiceScroll.querySelector('em'); if (em) em.textContent = 'Glisse vers le haut'; }
 let indiceY = 0; // la molette reste tant qu'on n'a pas vraiment avancé (un simple coup de molette sans effet ne l'enlève pas)
 gsap.ticker.add(() => { if (indiceScroll.classList.contains('visible') && Math.abs(window.scrollY - indiceY) > 40) indiceScroll.classList.remove('visible'); });
 let imgVortex: HTMLImageElement | null = null;
@@ -484,20 +485,24 @@ function majOrbe(proche: number, devant: boolean, x: number, haut: number) {
     const pr = projets[proche];
     const vertical = pr.format === 'vertical';
     // Aperçu : 9:16 pour l'application mobile, 16:9 pour le reste ; aussi grand que la place au-dessus du portail le permet.
-    const dispo = haut - 12;
-    const larg = vertical ? Math.max(90, Math.min(dispo, 400) * 9 / 16) : Math.max(180, Math.min((dispo * 16) / 9, 560, bandeau.clientWidth * 0.42));
+    const mobile = bandeau.clientWidth <= 700; // téléphone : l'aperçu est plus large, la fiche devient un volet en bas (voir le CSS)
+    const bas = mobile ? Math.min(haut - 4, bandeau.clientHeight - fiche.offsetHeight - 22) : haut - 4; // téléphone : l'aperçu reste au-dessus du volet de la fiche
+    const dispo = bas - 8;
+    const larg = vertical ? Math.max(90, Math.min(dispo, 400) * 9 / 16) : Math.max(180, Math.min((dispo * 16) / 9, 560, bandeau.clientWidth * (mobile ? 0.8 : 0.42)));
     const hauteur = vertical ? larg * 16 / 9 : larg * 9 / 16;
     const gauche = Math.min(Math.max(x, larg / 2 + 8), bandeau.clientWidth - larg / 2 - 8);
     orbe.classList.toggle('vertical', vertical);
     orbe.style.setProperty('--w', `${larg.toFixed(0)}px`);
     orbe.style.left = `${gauche.toFixed(1)}px`;
-    orbe.style.top = `${(haut - 4).toFixed(1)}px`;
+    orbe.style.top = `${bas.toFixed(1)}px`;
     // Fiche : à droite de l'aperçu (ou à gauche s'il n'y a pas la place), alignée sur son haut.
-    const lf = Math.min(310, bandeau.clientWidth * 0.34);
-    const droite = gauche + larg / 2 + 14 + lf <= bandeau.clientWidth - 8;
-    fiche.style.left = `${(droite ? gauche + larg / 2 + 14 : Math.max(8, gauche - larg / 2 - 14 - lf)).toFixed(1)}px`;
-    const topFiche = Math.max(10, haut - 4 - hauteur); fiche.style.top = `${topFiche.toFixed(1)}px`;
-    fiche.style.maxHeight = `${Math.max(160, bandeau.clientHeight - topFiche - 12).toFixed(0)}px`; // la fiche ne dépasse jamais l'écran : elle défile en interne
+    if (mobile) { fiche.style.left = fiche.style.top = fiche.style.maxHeight = ''; } else {
+      const lf = Math.min(310, bandeau.clientWidth * 0.34);
+      const droite = gauche + larg / 2 + 14 + lf <= bandeau.clientWidth - 8;
+      fiche.style.left = `${(droite ? gauche + larg / 2 + 14 : Math.max(8, gauche - larg / 2 - 14 - lf)).toFixed(1)}px`;
+      const topFiche = Math.max(10, haut - 4 - hauteur); fiche.style.top = `${topFiche.toFixed(1)}px`;
+      fiche.style.maxHeight = `${Math.max(160, bandeau.clientHeight - topFiche - 12).toFixed(0)}px`; // la fiche ne dépasse jamais l'écran : elle défile en interne
+    }
     if (proche !== orbeIndex) {
       orbeIndex = proche;
       if (annoncer(`p${proche}`, CATEGORIES[proche] ?? pr.type)) son.jouer('cristal', 0.2, 1.15); // le petit son : seulement à la découverte, pas quand on revient en arrière

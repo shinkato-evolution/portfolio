@@ -588,3 +588,43 @@ html.barre-jeu-on .btn-son { display: inline-flex; }
 .decouverte small { font: 700 0.625rem/1 var(--police); letter-spacing: 0.3em; text-transform: uppercase; color: #f3c45a; }
 .decouverte small::before, .decouverte small::after { content: "◆"; margin: 0 9px; font-size: 0.5rem; vertical-align: 1px; }
 .decouverte strong { font: 700 1.0625rem/1.2 var(--police); letter-spacing: 0.06em; color: #fff; }
+
+/* ---------- Téléphone (écran étroit) : en-tête compact, accueil, fiche en volet du bas, pierres lisibles ---------- */
+@media (max-width: 700px) {
+  /* En-tête : le titre, la ligne de présentation, puis les six rubriques sur une seule ligne */
+  .barre { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 12px; padding: 7px 8px 9px; min-height: 0; }
+  .barre-centre { order: -1; flex: 1 0 100%; }
+  .barre-gauche, .barre-droite { justify-self: auto; flex-direction: row; flex-wrap: nowrap; gap: 0; justify-content: center; }
+  .barre { gap: 0 9px; }
+  .barre nav { gap: 8px; }
+  .barre nav a { font-size: clamp(0.5rem, 2.45vw, 0.68rem); letter-spacing: 0.03em; padding: 9px 0 7px; }
+  .portfolio { font-size: 1.15rem; letter-spacing: 0.26em; padding-left: 0.26em; }
+  .ornement { width: 22px; margin: 0 9px; }
+  .barre-sous { white-space: normal; margin-top: 4px; font-size: 0.56rem; letter-spacing: 0.1em; line-height: 1.35; }
+
+  /* Accueil : le bouton tient sur l'écran */
+  .intro-reve { gap: 28px; }
+  .bouton-reve { padding: 16px 26px; gap: 12px; font-size: 0.95rem; letter-spacing: 0.16em; text-align: center; }
+  .v2-orbe .v2-bouton { padding: 0 38px; min-height: 64px; font-size: 1.25rem; }
+  .v2-orbe .v2-rail { width: min(78vw, 340px); }
+
+  /* Fiche d'un portail : un volet en bas de l'écran, replié par défaut, qui se déplie avec « Voir plus » */
+  .fiche-portail { display: block; left: 10px !important; right: 10px !important; top: auto !important; bottom: 10px; width: auto !important; max-height: 36svh !important; padding: 10px 14px 12px; }
+  .fiche-portail.ouvert { max-height: 66svh !important; }
+  .fiche-portail h2 { font-size: 1.05rem; margin: 2px 0 4px; }
+  .fiche-type { font-size: 0.6rem; }
+  .fiche-ligne { font-size: 0.75rem; line-height: 1.4; margin-top: 4px !important; }
+  .fiche-outils { margin-top: 6px; }
+  .fiche-plus { margin-top: 8px; padding: 9px 14px; }
+
+  /* Bandeau « Nouvelle découverte » et bouton du son plus discrets */
+  .decouverte { top: 10px; padding: 7px 18px 8px; max-width: 86vw; }
+  .decouverte strong { font-size: 0.9rem; }
+  .indice-scroll { bottom: 14px; }
+
+  /* Grotte : le panneau de texte en haut, la torche plus petite */
+  .pierre-texte { top: 62px; left: 10px; right: 36px; padding: 12px 14px; max-height: 50svh; overflow-y: auto; }
+  .pierre-texte h2 { font-size: 1.15rem; }
+  .pierre-texte p, .pierre-texte li { font-size: 0.8125rem; line-height: 1.45; }
+  .torche-main { height: 38%; }
+}

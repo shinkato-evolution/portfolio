@@ -155,7 +155,8 @@ export class Chemin {
   };
   private toucheY = 0;
   private surToucheDebut = (e: TouchEvent) => { this.toucheY = e.touches[0].clientY; };
-  private surToucheMouv = (e: TouchEvent) => { if (this.scenePortailOuverte() || (e.target as HTMLElement).closest?.('.fiche-portail')) return; e.preventDefault(); const y = e.touches[0].clientY; this.pousser((this.toucheY - y) * 1.3); this.toucheY = y; };
+  /** Fiche dépliée : elle défile d'elle-même ; repliée : le doigt fait avancer la scène. */
+  private surToucheMouv = (e: TouchEvent) => { if (this.scenePortailOuverte() || (e.target as HTMLElement).closest?.('.fiche-portail.ouvert')) return; e.preventDefault(); const y = e.touches[0].clientY; this.pousser((this.toucheY - y) * 1.3); this.toucheY = y; };
   private scenePortailOuverte() { return !!document.querySelector('dialog[open]'); }
   private avancerMaitrise() {
     const maintenant = performance.now(), dt = Math.min(0.05, (maintenant - this.tDernier) / 1000); this.tDernier = maintenant;
