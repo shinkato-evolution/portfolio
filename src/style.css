@@ -657,9 +657,7 @@ html.barre-jeu-on .btn-son { display: inline-flex; }
 }
 
 /* ---------- Téléphone, deuxième série de réglages ---------- */
-.mob-seul { display: none; }
 @media (max-width: 700px) {
-  .mob-seul { display: inline; }
   /* En-tête : une seule ligne ; une rubrique sur deux change de couleur pour les distinguer ; le cadenas laisse la place (le message le dit au toucher) */
   .barre { gap: 0; }
   .barre-gauche, .barre-droite { flex: 0 0 auto; }
@@ -674,3 +672,30 @@ html.barre-jeu-on .btn-son { display: inline-flex; }
   .v2-orbe { bottom: calc(9% + 64px); }
   .v2-main { bottom: calc(-19% + 64px); }
 }
+
+/* ---------- Téléphone, troisième série : en-tête ---------- */
+.barre-sep { display: none; }
+.niv-court { display: none; }
+@keyframes secoue { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+a[data-rubrique].secoue { animation: secoue 0.4s ease-in-out; }
+@media (max-width: 700px) {
+  .niv-long { display: none; }
+  .niv-court { display: inline; }
+  /* Séparateur : le même motif que les ornements du titre (trait doré qui s'efface, losange) entre la ligne de présentation et les rubriques */
+  .barre-sep { display: flex; flex: 1 0 100%; align-items: center; justify-content: center; margin: 1px 0 2px; }
+  .barre-sep .ornement { width: min(34vw, 130px); margin: 0; }
+  .barre-sep .ornement:last-child::after { display: none; }
+  /* Rubriques verrouillées : grisées, avec un petit cadenas sous le mot */
+  a[data-rubrique].verrou { display: inline-flex; flex-direction: column; align-items: center; opacity: 0.55; }
+  a[data-rubrique].verrou::before { display: block; order: 2; margin: 2px 0 0; width: 0.78em; height: 0.78em; }
+}
+
+/* Séparateur sous la ligne de présentation, rubriques sur une seule rangée */
+@media (max-width: 700px) {
+  .barre-centre { order: -2; }
+  .barre-sep { order: -1; }
+  .barre-gauche { margin-right: 9px; }
+  .barre nav { gap: 9px; }
+  .barre nav a { font-size: clamp(0.5rem, 2.3vw, 0.62rem); letter-spacing: 0.01em; }
+}
+@media (max-width: 700px) { .barre-sep { margin: 7px 0 3px; } }

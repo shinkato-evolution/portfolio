@@ -85,7 +85,7 @@ majVerrou();
 for (const a of liensRubriques) {
   const montrer = () => { if (!verrouille || reduit) return; const r = a.getBoundingClientRect(); toastVerrou.style.left = `${Math.round(Math.min(window.innerWidth - 150, Math.max(150, r.left + r.width / 2)))}px`; toastVerrou.style.top = `${Math.round(r.bottom + 10)}px`; toastVerrou.textContent = "Vivez d'abord le parcours"; toastVerrou.classList.add('visible'); window.clearTimeout(toastTimer); };
   const cacher = () => { toastTimer = window.setTimeout(() => toastVerrou.classList.remove('visible'), 150); };
-  a.addEventListener('mouseenter', montrer); a.addEventListener('focus', montrer); a.addEventListener('mouseleave', cacher); a.addEventListener('blur', cacher);
+  if (!window.matchMedia('(hover: none)').matches) { a.addEventListener('mouseenter', montrer); a.addEventListener('focus', montrer); a.addEventListener('mouseleave', cacher); a.addEventListener('blur', cacher); } // écran tactile : pas de survol, le message vient du toucher (voir plus bas)
 }
 // E-mail : si aucun logiciel de messagerie n'est réglé sur l'ordinateur, le lien « mailto: » ne fait rien. On copie donc l'adresse et on le dit.
 document.addEventListener('click', (e) => {
@@ -98,7 +98,9 @@ document.addEventListener('click', (e) => {
 const toastVerrou = $('toast-verrou'); let toastTimer: number | undefined;
 function direVerrou(a?: HTMLElement) {
   if (a) { const r = a.getBoundingClientRect(); toastVerrou.style.left = `${Math.round(Math.min(window.innerWidth - 150, Math.max(150, r.left + r.width / 2)))}px`; toastVerrou.style.top = `${Math.round(r.bottom + 10)}px`; } // sous la rubrique touchée
-  toastVerrou.textContent = "Vivez d'abord le parcours"; toastVerrou.classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toastVerrou.classList.remove('visible'), 2200); }
+  toastVerrou.textContent = "Vivez d'abord le parcours"; toastVerrou.classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toastVerrou.classList.remove('visible'), 3000);
+  if (a) { a.classList.remove('secoue'); void a.offsetWidth; a.classList.add('secoue'); } // la rubrique touchée tremble : on voit que le toucher a été pris en compte
+}
 const pied = document.querySelector('footer.barre-bas');
 if (pied && 'IntersectionObserver' in window) new IntersectionObserver((es) => { if (parcoursVu && es.some((e) => e.isIntersecting)) deverrouiller(); }, { threshold: 0.15 }).observe(pied);
 
@@ -402,7 +404,7 @@ $('btn-phase1v2').addEventListener('click', async () => {
     Object.assign(window, { __v2: p2 });
     arreterPoussiere(); barreJeu?.afficher(); intro.classList.add('parti'); // la scène 3D est noire elle aussi : le relais ne se voit pas
     await p2.demarrer();
-    v2Vol = true; verrouiller(false); indiceY = window.scrollY; indiceScroll.classList.add('visible'); // on peut avancer : l'icône de la molette invite à défiler vers le bas
+    v2Vol = true; verrouiller(false); chemin.recaler(); indiceY = window.scrollY; indiceScroll.classList.add('visible'); // on peut avancer : l'icône de la molette invite à défiler vers le bas
   } catch (err) {
     console.warn('Phase 1 V2 indisponible, retour à la phase 1.', err);
     v2Actif = false; v2Charge = false; scene2d.classList.remove('v2-on');

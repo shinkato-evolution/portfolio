@@ -139,6 +139,8 @@ export class Chemin {
     if (oui) { this.cibleY = window.scrollY; this.tDernier = performance.now(); this.portailPasse = -1; window.addEventListener('wheel', this.surRoue, { capture: true, passive: false }); window.addEventListener('keydown', this.surTouche, true); window.addEventListener('touchstart', this.surToucheDebut, { capture: true, passive: true }); window.addEventListener('touchmove', this.surToucheMouv, { capture: true, passive: false }); }
     else { window.removeEventListener('wheel', this.surRoue, true); window.removeEventListener('keydown', this.surTouche, true); window.removeEventListener('touchstart', this.surToucheDebut, true); window.removeEventListener('touchmove', this.surToucheMouv, true); }
   }
+  /** Annule tout déplacement en attente (doigt ou molette poussés pendant la chute) : le vol part de là où l'on est. */
+  recaler() { this.cibleY = window.scrollY; }
   /** Plancher du défilement maîtrisé (début de la grotte) : ce qu'on pousse en dessous est compté par `surRecul` au lieu de faire reculer la page. */
   plancher: number | null = null; surRecul: ((exces: number) => void) | null = null;
   private pousser(dy: number) {
