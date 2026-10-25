@@ -646,3 +646,12 @@ html.barre-jeu-on .btn-son { display: inline-flex; }
   /* Pied de page plus tôt : on retire la pause de 40 écrans-centièmes après la grotte */
   .jeu { height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100vh - var(--h-barre)); height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100svh - var(--h-barre)); }
 }
+
+/* Croix de fermeture du panneau de la grotte : téléphone seulement, à 4 px du coin haut droit */
+.pierre-fermer { display: none; }
+@media (max-width: 700px) {
+  .pierre-fermer {
+    display: flex; align-items: center; justify-content: center; float: right; position: sticky; top: -9px; z-index: 2; width: 34px; height: 34px; margin: -9px -10px 4px 8px; /* 4 px du coin haut droit du cadre (bord compris) */ padding: 0;
+    border: 1px solid rgba(255, 210, 90, 0.8); border-radius: 8px; background: rgba(20, 10, 44, 0.9); color: #ffe39a; font: 400 1.45rem/1 var(--police); cursor: pointer;
+  }
+}

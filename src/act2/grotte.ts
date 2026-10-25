@@ -37,7 +37,7 @@ export class Grotte {
   private r = 0; private uLisse = 0; private uPrec = 0; private mouvement = 0;
   private entree = -1; private actif = false;
   private sol!: THREE.Texture; private roche!: THREE.Texture;
-  private pierreActive = -1;
+  private pierreActive = -1; private debutVue = 0; private texteFerme = false;
 
   constructor(private hote: HTMLElement, private mobile: boolean) {}
 
@@ -206,6 +206,8 @@ export class Grotte {
       this.torcheMain.append(e);
     }
     this.panneau.className = 'pierre-texte'; this.panneau.setAttribute('aria-live', 'polite');
+    // Téléphone : la croix du panneau le ferme (la rune se revoit) ; il revient quand on quitte la pierre puis qu'on s'en approche.
+    this.panneau.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('.pierre-fermer')) { this.texteFerme = true; this.panneau.classList.remove('visible'); } });
     this.ui.append(vignette, this.torcheMain, this.panneau);
     this.hote.append(this.ui);
   }
@@ -215,6 +217,7 @@ export class Grotte {
     // Échappement HTML puis **mot-clé** en or.
     const echap = (s: string) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string)).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     this.panneau.innerHTML =
+      '<button type="button" class="pierre-fermer" aria-label="Fermer le texte">×</button>' +
       `<p class="pierre-num">${i + 1}/${this.pierres.length}</p><h2>${echap(d.titre)}</h2>` +
       (d.p ? d.p.map((t) => `<p>${echap(t)}</p>`).join('') : '') +
       (d.sections ? d.sections.map((sec) => `<section class="${sec.cle ? 'sec-cle' : ''}"><h3>${echap(sec.titre)}</h3>` + (sec.p ? sec.p.map((t) => `<p>${echap(t)}</p>`).join('') : '') + (sec.li ? `<ul>${sec.li.map((t) => `<li>${echap(t)}</li>`).join('')}</ul>` : '') + '</section>').join('') : '') +
@@ -308,8 +311,11 @@ export class Grotte {
       const reg = new THREE.Vector3(); this.camera.getWorldDirection(reg); reg.y = 0; reg.normalize();
       vue = dir.dot(reg) > 0.8 && pmax > 0.6;   // dans l'axe du regard (à ~35°) et assez proche
     }
-    if (vue && proche !== this.pierreActive) { this.pierreActive = proche; this.remplirPanneau(proche); }
-    this.panneau.classList.toggle('visible', vue && ti > 1.2);
+    if (vue && proche !== this.pierreActive) { this.pierreActive = proche; this.remplirPanneau(proche); this.texteFerme = false; }
+    if (!vue) { this.debutVue = 0; this.texteFerme = false; } else if (!this.debutVue) this.debutVue = performance.now();
+    // Téléphone : la rune reste seule à l'écran une seconde, puis le texte s'ouvre ; la croix le referme.
+    const telephone = this.hote.clientWidth <= 700, attendu = !telephone || performance.now() - this.debutVue > 1000;
+    this.panneau.classList.toggle('visible', vue && ti > 1.2 && attendu && !(telephone && this.texteFerme));
 
     // Torche : balancement à la marche, se lève vers la pierre quand on s'y arrête ; flamme qui danse, lumière qui pulse.
     const monte = 1 - lisse(0.3, 1.5, ti);
