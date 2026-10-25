@@ -628,3 +628,21 @@ html.barre-jeu-on .btn-son { display: inline-flex; }
   .pierre-texte p, .pierre-texte li { font-size: 0.8125rem; line-height: 1.45; }
   .torche-main { height: 38%; }
 }
+
+/* ---------- Téléphone : réglages d'après essai sur un vrai appareil ---------- */
+@media (max-width: 700px) {
+  /* « Nouvelle découverte » : centré, sur une ligne, plus fin */
+  .decouverte { left: 0; right: 0; margin: 0 auto; width: max-content; max-width: 88vw; top: 8px; gap: 3px; padding: 6px 16px 7px; transform: translateY(-14px); }
+  .decouverte.visible { transform: none; }
+  .decouverte small { font-size: 0.5rem; letter-spacing: 0.22em; white-space: nowrap; }
+  .decouverte small::before, .decouverte small::after { margin: 0 6px; }
+  .decouverte strong { font-size: 0.85rem; letter-spacing: 0.03em; line-height: 1.25; }
+  /* En-tête : deux rangées de trois rubriques, bien espacées */
+  .barre-gauche, .barre-droite { flex: 1 0 100%; }
+  .barre nav { gap: 22px; }
+  .barre nav a { font-size: clamp(0.6rem, 2.9vw, 0.72rem); letter-spacing: 0.08em; padding: 7px 0 6px; }
+  /* Panneau de la grotte : il défile au doigt ; la scène reprend la main en bout de course */
+  .pierre-texte { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  /* Pied de page plus tôt : on retire la pause de 40 écrans-centièmes après la grotte */
+  .jeu { height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100vh - var(--h-barre)); height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100svh - var(--h-barre)); }
+}

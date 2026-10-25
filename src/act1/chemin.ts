@@ -156,7 +156,12 @@ export class Chemin {
   private toucheY = 0;
   private surToucheDebut = (e: TouchEvent) => { this.toucheY = e.touches[0].clientY; };
   /** Fiche dépliée : elle défile d'elle-même ; repliée : le doigt fait avancer la scène. */
-  private surToucheMouv = (e: TouchEvent) => { if (this.scenePortailOuverte() || (e.target as HTMLElement).closest?.('.fiche-portail.ouvert')) return; e.preventDefault(); const y = e.touches[0].clientY; this.pousser((this.toucheY - y) * 1.3); this.toucheY = y; };
+  private surToucheMouv = (e: TouchEvent) => {
+    const panneau = (e.target as HTMLElement).closest?.('.pierre-texte') as HTMLElement | null;
+    if (panneau && panneau.scrollHeight > panneau.clientHeight + 2) { // panneau de texte (grotte) plus long que son cadre : le doigt le fait défiler
+      const dy = this.toucheY - e.touches[0].clientY, peutDescendre = panneau.scrollTop + panneau.clientHeight < panneau.scrollHeight - 1, peutMonter = panneau.scrollTop > 0;
+      if ((dy > 0 && peutDescendre) || (dy < 0 && peutMonter)) { e.preventDefault(); panneau.scrollTop += dy; this.toucheY = e.touches[0].clientY; return; }
+    } if (this.scenePortailOuverte() || (e.target as HTMLElement).closest?.('.fiche-portail.ouvert')) return; e.preventDefault(); const y = e.touches[0].clientY; this.pousser((this.toucheY - y) * 1.3); this.toucheY = y; };
   private scenePortailOuverte() { return !!document.querySelector('dialog[open]'); }
   private avancerMaitrise() {
     const maintenant = performance.now(), dt = Math.min(0.05, (maintenant - this.tDernier) / 1000); this.tDernier = maintenant;
