@@ -178,7 +178,8 @@ export class Chemin {
     this.ancrePorteY = fournies ?? POSITIONS_PORTAILS.map((q) => this.yPour(q - RECUL_ARRET));
     // Une commande ne peut pas être loin devant la position : un grand coup de molette ne fait pas sauter de portails.
     this.cibleY = Math.max(pos - 500, Math.min(pos + 500, this.cibleY));
-    const vmax = this.vitesseMaitrise; // px/s : constante, un peu en dessous d'une vitesse moyenne
+    let vmax = this.vitesseMaitrise; // px/s : constante, un peu en dessous d'une vitesse moyenne
+    if (fournies && fournies.length && pos > fournies[fournies.length - 1] + 4) vmax *= 2.4; // après la dernière pierre : on file vers le pied de page
     let step = Math.max(-vmax * dt, Math.min(vmax * dt, this.cibleY - pos));
     // Arrêt à un portail : si ce pas le franchit, on s'y fige.
     for (let i = 0; i < this.ancrePorteY.length - (fournies ? 0 : 1); i++) {

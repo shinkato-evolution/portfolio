@@ -376,11 +376,25 @@ barre.addEventListener('click', (ev) => {
 // ---------- Fenêtre du trailer : apparaît au-dessus du portail quand le héros est à côté ; un clic entre dans le projet.
 const panneauAutres = $('autres'); const videosAutres = Array.from(panneauAutres.querySelectorAll('video'));
 let autresVisible = false;
-/** Portail « Et bien d'autres » : un titre et trois petites fenêtres vidéo, fixes à l'écran, qui jouent en même temps. */
+// Téléphone : une seule fenêtre à la fois, avec une flèche de chaque côté du titre (la première n'a que « suivant », la dernière que « précédent »).
+const figuresAutres = Array.from(panneauAutres.querySelectorAll('figure'));
+const flecheAutreG = panneauAutres.querySelector('.autres-g') as HTMLButtonElement, flecheAutreD = panneauAutres.querySelector('.autres-d') as HTMLButtonElement;
+let autreIdx = 0;
+const autresEnCarrousel = () => bandeau.clientWidth <= 700;
+function jouerAutres() { videosAutres.forEach((v, k) => { if (autresVisible && (!autresEnCarrousel() || k === autreIdx)) v.play().catch(() => { /* lecture refusée */ }); else v.pause(); }); }
+function montrerAutre(i: number) {
+  autreIdx = Math.max(0, Math.min(figuresAutres.length - 1, i));
+  figuresAutres.forEach((f, k) => f.classList.toggle('actif', k === autreIdx));
+  flecheAutreG.style.visibility = autreIdx === 0 ? 'hidden' : 'visible'; flecheAutreD.style.visibility = autreIdx === figuresAutres.length - 1 ? 'hidden' : 'visible';
+  jouerAutres();
+}
+flecheAutreG.addEventListener('click', () => montrerAutre(autreIdx - 1)); flecheAutreD.addEventListener('click', () => montrerAutre(autreIdx + 1));
+montrerAutre(0);
+/** Portail « Et bien d'autres » : un titre et trois petites fenêtres vidéo, fixes à l'écran (sur téléphone : une à la fois, avec des flèches). */
 function majAutres(oui: boolean) {
   if (oui === autresVisible) return; autresVisible = oui; if (oui && annoncer('autres', 'et bien d\'autres')) son.jouer('cristal', 0.2, 1.15);
   panneauAutres.classList.toggle('visible', oui);
-  for (const v of videosAutres) { if (oui) v.play().catch(() => { /* lecture refusée */ }); else v.pause(); }
+  if (!oui) montrerAutre(0); else jouerAutres(); // on repart toujours de la première
 }
 // Bandeau « Nouvelle découverte » : annonce la première apparition de chaque portail, sans son (celui de la fiche suffit).
 const CATEGORIES = ['application mobile Shinkatô', 'site internet Shinkatô', 'jeu vidéo', 'jeu ludique', 'jeu ludique', 'jeu vidéo', 'jeu vidéo'];

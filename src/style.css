@@ -114,7 +114,7 @@ img, canvas { display: block; }
 }
 
 /* ---------- Acte 1 : le bandeau remplit tout l'écran sous l'en-tête ---------- */
-.jeu { position: relative; height: calc((40 + var(--gv, 1250) + var(--cv, 700)) * 1vh + 100vh - var(--h-barre)); height: calc((40 + var(--gv, 1250) + var(--cv, 700)) * 1vh + 100svh - var(--h-barre)); /* 700vh de chemin + 500vh de grotte + 40vh de pause + la scène */ }
+.jeu { position: relative; height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100vh - var(--h-barre)); height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100svh - var(--h-barre)); /* 700vh de chemin + 500vh de grotte + 40vh de pause + la scène */ }
 .reduit .jeu { height: calc(700vh + 100vh - var(--h-barre)); height: calc(700vh + 100svh - var(--h-barre)); }
 .fin-reduit { display: none; }
 .reduit .fin-reduit { display: block; min-height: 40vh; }
@@ -450,7 +450,7 @@ html.barre-jeu-on::-webkit-scrollbar { display: none; }
 .autres figure { margin: 0; }
 .autres video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #000; border: 1px solid var(--or); box-shadow: 0 0 0 4px rgba(251, 248, 241, 0.5), 0 10px 28px rgba(60, 40, 110, 0.22); box-sizing: border-box; }
 .autres figcaption { margin-top: 8px; font: 700 0.75rem/1.2 var(--police); letter-spacing: 0.14em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 6px rgba(30, 10, 80, 0.8); }
-@media (max-width: 700px) { .autres-grille { grid-template-columns: 1fr; } .autres figure:nth-child(n + 2) { display: none; } }
+@media (max-width: 700px) { .autres-grille { grid-template-columns: 1fr; } }
 .v2-chute .autres { visibility: hidden; }
 
 /* Barre de jeu : repères découverts = survol (nom) + clic (y retourner) ; les autres restent sombres et inertes */
@@ -550,8 +550,6 @@ html.barre-jeu-on .btn-son { display: inline-flex; }
   .barre nav a { font-size: clamp(0.6rem, 2.9vw, 0.72rem); letter-spacing: 0.08em; padding: 7px 0 6px; }
   /* Panneau de la grotte : il défile au doigt ; la scène reprend la main en bout de course */
   .pierre-texte { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
-  /* Pied de page plus tôt : on retire la pause de 40 écrans-centièmes après la grotte */
-  .jeu { height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100vh - var(--h-barre)); height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100svh - var(--h-barre)); }
 }
 
 /* Croix de fermeture du panneau de la grotte : téléphone seulement, à 4 px du coin haut droit */
@@ -627,4 +625,16 @@ a[data-rubrique].secoue { animation: secoue 0.4s ease-in-out; }
   .barre { justify-content: space-between; }
   .barre .barre-gauche, .barre .barre-droite, .barre .barre-droite nav { display: contents; }
   .barre nav a { font-size: clamp(0.5rem, 2.4vw, 0.66rem); letter-spacing: 0; white-space: nowrap; }
+}
+
+/* « Et bien d'autres » : flèches seulement sur téléphone, où une seule fenêtre s'affiche à la fois */
+.autres-tete { display: contents; }
+.autres-fleche { display: none; }
+@media (max-width: 700px) {
+  .autres-tete { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; }
+  .autres-tete h2 { margin: 0; }
+  .autres-fleche { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--or); border-radius: 50%; background: rgba(251, 248, 241, 0.94); color: var(--encre); font: 700 1.5rem/1 var(--police); cursor: pointer; pointer-events: none; }
+  .autres.visible .autres-fleche { pointer-events: auto; }
+  .autres figure { display: none; }
+  .autres figure.actif { display: block; }
 }
