@@ -62,7 +62,7 @@ export class PhaseV2 {
   private tPuits = 0; private profondeur = 0; private resolvePuits: (() => void) | null = null; private debris: { x: number; y: number; z: number; s: number; v: number; r: number }[] = [];
   private boucle = 0; private tPrec = 0; private temps = 0; private actif = false;
   private lisse: { x: number; y: number } | null = null; private zoom = 0; private coups = 0; private secousse = 0; private plongee = 0;
-  private resolvePret: (() => void) | null = null;
+  private resolvePret: (() => void) | null = null; private tlDemarrage: gsap.core.Timeline | null = null;
   private tex: Record<string, THREE.Texture> = {};
 
   constructor(private hote: HTMLElement, private lireP: () => number) {}
@@ -337,7 +337,7 @@ export class PhaseV2 {
     gsap.set(this.yeux, { '--rx': '130%', '--ry': '0.5%' });
     return new Promise((resolve) => {
       this.resolvePret = resolve;
-      const tl = gsap.timeline();
+      const tl = this.tlDemarrage = gsap.timeline();
       tl.call(() => this.yeux.classList.remove('ferme'), undefined, 0.35)
         .to(this.yeux, { '--ry': '22%', duration: 0.6, ease: 'power1.out' }, 0.4)     // il se réveille : les paupières s'entrouvrent…
         .to(this.yeux, { '--ry': '2%', duration: 0.28, ease: 'power1.in' })            // …se referment un peu…
@@ -372,7 +372,7 @@ export class PhaseV2 {
 
   /** Un appui sur le bouton : la barre se remplit, la scène tremble ; à la fin, les yeux se ferment. */
   private accrocher() {
-    if (this.mode !== 'chute') return;
+    if (this.mode !== 'chute' || !this.orbeUi.classList.contains('visible')) return; // pas d'appui tant que le bouton n'est pas apparu : la séquence d'ouverture n'est jamais devancée
     this.coups += 1; // un appui ne fait bouger que la barre et le bouton : ni zoom ni secousse
     son.jouer('compte_tick', 0.7, 0.85 + this.coups * 0.07); son.coeur(70 + this.coups * 14); son.vent(0.4 + this.coups * 0.04, 0.4); son.tension(Math.min(1, 0.4 + this.coups * 0.08), 0.6);
     if (this.coups === 3) this.mainsPose(1);
@@ -410,6 +410,8 @@ export class PhaseV2 {
 
   /** Après l'animation : écran noir, puis les yeux s'ouvrent sur le vol (clignement puis ouverture complète), sans éclair blanc. */
   private ouvrirYeux() {
+    // Filet de sécurité : la phrase de la chute et ses minuteries ne doivent jamais passer sur le vol.
+    this.tlDemarrage?.kill(); this.tlDemarrage = null; gsap.killTweensOf(this.texte); gsap.set(this.texte, { opacity: 0 });
     gsap.set(this.yeux, { '--rx': '130%', '--ry': '0.5%' });
     this.yeux.classList.remove('ferme');
     this.yeux.style.display = 'block';
