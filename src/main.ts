@@ -1,12 +1,10 @@
 // Point d'entrée. Le texte complet est déjà dans le HTML : ce script n'ajoute que la couche jouable.
-// PixiJS est chargé en différé (import()) : commandes et panneau fonctionnent avant qu'il arrive.
 import donnees from './content/projets.json';
 import type { Projet } from './types';
 import { Chemin, POSITIONS_PORTAILS, type EtatChemin } from './act1/chemin';
-import { ScenePortail } from './scene/provisoire';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import type { Monde } from './act1/monde';
+import type { SourceBrisure } from './break/source';
 import { vortexNoir, VortexAnime } from './v2/vortex';
 import { poussiereAccueil } from './v2/poussiere';
 import { creerBarreJeu } from './barre-jeu';
@@ -20,7 +18,7 @@ window.scrollTo(0, 0);
 window.addEventListener('pageshow', (e) => { if (e.persisted) window.scrollTo(0, 0); });
 
 const projets = donnees.projets as Projet[];
-let monde: Monde | null = null;
+let monde: SourceBrisure | null = null;
 let brisure: Brisure | null = null;
 let brisureEnCours = false;
 let cibleRubrique: number | null = null; // rubrique demandée par le menu avant la brisure
@@ -30,7 +28,7 @@ let phase: Phase = 'chemin';
 const intro = document.getElementById('intro-reve') as HTMLElement;
 const scene2d = document.querySelector('#jeu .jeu-scene') as HTMLElement;
 let v2: import('./v2/phase1v2').PhaseV2 | null = null;
-let v2Actif = false; // Phase 1 V2 : la scène 3D pilote l'image
+let v2Actif = false; // la scène 3D pilote l'image
 let v2Vol = false;   // la chute est finie : le défilement fait voler le dragon
 let v2Charge = false;
 const indiceScroll = document.getElementById('indice-scroll') as HTMLElement;
@@ -49,14 +47,8 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 const section = $('jeu');
 const bandeau = $('bandeau');
 const btnReduire = document.getElementById('btn-reduire') as HTMLButtonElement | null; // retiré de l'en-tête : le mode « animations réduites » ne s'active plus que par le réglage du système
-const btnEntrer = $<HTMLButtonElement>('btn-entrer');
-const btnPrec = $<HTMLButtonElement>('btn-prec');
-const btnSuiv = $<HTMLButtonElement>('btn-suiv');
-const invite = $('invite');
-const etatHeros = $('etat-hero');
 const orbe = $('orbe');
 const orbeVideo = $<HTMLVideoElement>('orbe-video');
-const message = $('message-futur');
 
 // La hauteur de l'en-tête (variable selon la largeur) décale la scène collée sous lui.
 const barre = $('barre');
@@ -71,6 +63,7 @@ const CLE_PARCOURS = 'parcours-vu';
 const liensRubriques = Array.from(barre.querySelectorAll<HTMLAnchorElement>('a[data-rubrique]'));
 let parcoursVu = false; // la grotte a été atteinte pendant cette visite
 let verrouille = false;
+if (/[?&]verrou\b/.test(location.search)) { try { localStorage.removeItem(CLE_PARCOURS); } catch { /* stockage indisponible */ } } // adresse?verrou : remet les rubriques à l'état de la première visite (pour essayer)
 try { verrouille = localStorage.getItem(CLE_PARCOURS) !== '1'; } catch { verrouille = true; }
 function majVerrou() {
   for (const a of liensRubriques) {
@@ -96,17 +89,15 @@ document.addEventListener('click', (e) => {
   toastVerrou.textContent = `Adresse copiée : ${adresse}`; toastVerrou.classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toastVerrou.classList.remove('visible'), 4000);
 });
 const toastVerrou = $('toast-verrou'); let toastTimer: number | undefined;
-function direVerrou(a?: HTMLElement) {
+function direVerrou(a?: HTMLElement, texte = "Vivez d'abord le parcours") {
   if (a) { const r = a.getBoundingClientRect(); toastVerrou.style.left = `${Math.round(Math.min(window.innerWidth - 150, Math.max(150, r.left + r.width / 2)))}px`; toastVerrou.style.top = `${Math.round(r.bottom + 10)}px`; } // sous la rubrique touchée
-  toastVerrou.textContent = "Vivez d'abord le parcours"; toastVerrou.classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toastVerrou.classList.remove('visible'), 3000);
+  toastVerrou.textContent = texte; toastVerrou.classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toastVerrou.classList.remove('visible'), 3000);
   if (a) { a.classList.remove('secoue'); void a.offsetWidth; a.classList.add('secoue'); } // la rubrique touchée tremble : on voit que le toucher a été pris en compte
 }
 const pied = document.querySelector('footer.barre-bas');
 if (pied && 'IntersectionObserver' in window) new IntersectionObserver((es) => { if (parcoursVu && es.some((e) => e.isIntersecting)) deverrouiller(); }, { threshold: 0.15 }).observe(pied);
 
 const chemin = new Chemin(section, reduit);
-const scene = new ScenePortail();
-scene.surFermeture = () => chemin.suspendre(false);
 
 // ---------- Réduire les animations
 const mqReduit = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -125,59 +116,11 @@ mqReduit.addEventListener('change', (e) => {
   definirReduit(e.matches, false);
 });
 
-// ---------- Panneau HTML en haut du bandeau
-const DERNIER = POSITIONS_PORTAILS.length - 1; // le portail « ??? »
+// ---------- Repères du chemin
+const DERNIER = POSITIONS_PORTAILS.length - 1; // le portail noir
 const AUTRES = DERNIER - 1; // le portail « Et bien d'autres »
-const CONTENU_AUTRES = { titre: "Et bien d'autres", statut: 'des jeux en route', emblème: { nom: 'Le Carnet', phrase: 'Un aperçu des autres projets.' } };
-const SEUIL_PORTAIL_NOIR = 0.012; // en V2 : l'animation de chute part quand la progression est à moins de 1,2 % du portail noir (~18 unités de la scène)
-const FUTUR = { titre: '???', statut: 'à venir', emblème: { nom: 'Un portail inconnu', phrase: 'Les prochains projets.' } };
-let dernierProche = -1, dernierDevant = false;
-function majPanneau(e: EtatChemin) {
-  const p = projets[e.proche] ?? (e.proche === AUTRES ? CONTENU_AUTRES : FUTUR);
-  if (e.proche !== dernierProche) {
-    dernierProche = e.proche;
-    $('hud-compteur').textContent = `${e.proche + 1}/${POSITIONS_PORTAILS.length}`;
-    $('hud-statut').textContent = `· ${p.statut}`;
-    $('hud-titre').textContent = p.titre;
-    $('hud-embleme').textContent = p.emblème.nom;
-    $('hud-phrase').textContent = p.emblème.phrase;
-    btnEntrer.textContent = e.proche === DERNIER ? 'Avancer' : 'Entrer';
-    btnEntrer.setAttribute('aria-label', e.proche === DERNIER ? 'Franchir le portail inconnu' : `Entrer dans le portail ${e.proche + 1} : ${p.titre}`);
-  }
-  if (e.devant !== dernierDevant) { dernierDevant = e.devant; invite.classList.toggle('visible', e.devant); }
-  btnPrec.setAttribute('aria-disabled', String(e.p <= 0.001));
-  btnSuiv.setAttribute('aria-disabled', String(e.p >= POSITIONS_PORTAILS[DERNIER] - 0.003));
-  if (e.p > 0.7) chargerBrisure();
-  verifierFutur(e);
-}
-
-// ---------- Entrer / sortir
-function entrer(i = chemin.etat.proche) {
-  if (scene.ouverte) return;
-  if (i >= projets.length) { // le portail « ??? » : le message se joue dès que le héros est devant
-    if (!chemin.etat.devant || chemin.etat.proche !== i) chemin.allerAuPortail(i); else lancerFutur();
-    return;
-  }
-  if (!chemin.etat.devant || chemin.etat.proche !== i) chemin.allerAuPortail(i, true); // le héros se place devant, sans animation
-  chemin.suspendre(true);
-  scene.ouvrir(projets[i], i, projets.length, btnEntrer);
-}
-btnEntrer.addEventListener('click', () => entrer());
-btnPrec.addEventListener('click', () => chemin.precedent());
-btnSuiv.addEventListener('click', () => chemin.suivant());
-
-window.addEventListener('keydown', (ev) => {
-  if (scene.ouverte || !chemin.dansLeJeu() || ev.altKey || ev.ctrlKey || ev.metaKey) return;
-  const cible = ev.target as HTMLElement;
-  const surControle = cible.closest('button, a, input, textarea, select, [contenteditable]');
-  if (ev.key === 'ArrowRight') { ev.preventDefault(); chemin.suivant(); }
-  else if (ev.key === 'ArrowLeft') { ev.preventDefault(); chemin.precedent(); }
-  else if ((ev.key === 'Enter' || ev.key === ' ') && !surControle && chemin.etat.devant) { ev.preventDefault(); entrer(); }
-});
-
-// ---------- Rendu (différé)
-chemin.surChangement = (e) => { majPanneau(e); };
-majPanneau(chemin.etat);
+const SEUIL_PORTAIL_NOIR = 0.012; // l'animation de chute part quand la progression est à moins de 1,2 % du portail noir (~18 unités de la scène)
+chemin.surChangement = (e: EtatChemin) => { if (e.p > 0.7) chargerBrisure(); verifierFutur(e); };
 
 // ---------- Fin du chemin : la brisure se joue d'un coup, puis la grotte (acte 2) suit le défilement.
 // Le défilement est bloqué pendant la scène ; remonter tout en haut de la grotte rejoue la scène à l'envers.
@@ -187,10 +130,11 @@ const hauteurGrotte = () => (5 / VITESSE_GROTTE) * window.innerHeight;
 const majQ = () => brisure?.definirQ(proxy.q);
 
 function chargerBrisure() {
-  if (brisure || brisureEnCours || !monde || reduit) return;
+  if (brisure || brisureEnCours || reduit) return;
   brisureEnCours = true;
-  import('./break/brisure').then(async ({ Brisure }) => {
-    const b = new Brisure(section.querySelector('.jeu-scene') as HTMLElement, monde!);
+  Promise.all([import('./break/brisure'), import('./break/source')]).then(async ([{ Brisure }, { SourceBrisure }]) => {
+    monde = new SourceBrisure(scene2d);
+    const b = new Brisure(scene2d, monde);
     try { await b.init(); } catch (err) { console.warn('Brisure indisponible.', err); return; }
     brisure = b;
     b.preparerGrotte();
@@ -230,7 +174,7 @@ function surDefilement() {
 /** Rejoue le portail « ??? » en cas de passage devant lui (sinon on attend d'être loin). */
 function verifierFutur(e: EtatChemin) {
   if (reduit) return;
-  // Phase 1 V2 : un seul déclencheur, à une distance précise du portail noir (en pas de défilement) ; reculer ramène avant ce seuil, avancer le redéclenche toujours.
+  // Un seul déclencheur, à une distance précise du portail noir (en pas de défilement) ; reculer ramène avant ce seuil, avancer le redéclenche toujours.
   if (v2Actif && phase === 'chemin' && brisure && e.p >= POSITIONS_PORTAILS[DERNIER] - SEUIL_PORTAIL_NOIR) { lancerFutur(); return; }
   if (e.proche !== DERNIER || e.distance > 0.03) futurVu = false;
   else if (!futurVu && e.devant && phase === 'chemin' && brisure) lancerFutur();
@@ -240,20 +184,19 @@ function verifierFutur(e: EtatChemin) {
 function lancerFutur() {
   if (!brisure || phase !== 'chemin' || reduit) return;
   phase = 'brisure'; futurVu = true;
-  if (v2Actif) { bloque = true; yBloque = window.scrollY; chemin.suspendre(true); } // en V2 on fige là où l'on est : pas de saut vers le portail
-  else verrouiller(true, chemin.yDuPortail(DERNIER));
+  bloque = true; yBloque = window.scrollY; chemin.suspendre(true); // on fige là où l'on est : pas de saut vers le portail
   brisure.preparerGrotte();
   void son.precharger('tournoi'); // la musique de la grotte se charge pendant la chute
   sequence?.kill();
   proxy.q = 0;
-  if (v2Actif && v2) { // Phase 1 V2 : le dragon plonge devant le portail noir, puis on retrouve la chute classique jusqu'à la grotte
+  if (v2Actif && v2) { // le dragon plonge devant le portail noir, puis on retrouve la chute classique jusqu'à la grotte
     const lance = v2;
     lance.cinematique().then(() => {
-      // Écran noir : la brisure fissure le vortex noir (jamais la bande 2D de la phase 1), puis le personnage dessiné tombe avec l'effet de fracture, jusqu'à la grotte.
+      // Écran noir : la brisure fissure le vortex noir puis le personnage dessiné tombe avec l'effet de fracture, jusqu'à la grotte.
       const t = monde!.taille, res = Math.min(window.devicePixelRatio || 1, 2);
       const va = new VortexAnime(Math.max(2, Math.round(t.largeur * res * 0.75)), Math.max(2, Math.round(t.hauteur * res * 0.75)), imgVortex);
       monde!.capturePerso = va.canvas;
-      monde!.heros.alpha = 1; monde!.heros.definirDessin(posesChute);
+      monde!.heros.definirPoses(posesChute);
       proxy.q = 0.003; majQ(); // la brisure s'active avant que la scène 3D soit retirée
       const t0 = performance.now(); // le vortex reste ANIMÉ (chaos de plus en plus fort) jusqu'à ce que l'écran craque
       const animer = () => { const q = proxy.q; if (q > 0.27 || phase === 'grotte' || !va) { gsap.ticker.remove(animer); return; } va.maj((performance.now() - t0) / 1000, Math.min(1, q / 0.25)); brisure?.rafraichirImage(); };
@@ -270,14 +213,6 @@ function lancerFutur() {
     });
     return;
   }
-  sequence = gsap.timeline({ onComplete: ouvrirGrotte })
-    .call(() => message.classList.add('visible'))
-    .to({}, { duration: 3.6 })                                                   // « Le futur est rempli de projets… »
-    .call(() => message.classList.remove('visible'))
-    .to({}, { duration: 0.7 })
-    .to(proxy, { q: 0.25, duration: 1.7, ease: 'power2.in', onUpdate: majQ })   // le tremblement monte, l'écran se fissure
-    .to(proxy, { q: 0.33, duration: 0.4, ease: 'power1.out', onUpdate: majQ })  // l'écran éclate
-    .to(proxy, { q: 0.62, duration: 2.4, ease: 'none', onUpdate: majQ });        // il tombe dans le vide
 }
 
 // Pas dans la grotte : un pas tous les PAS_PX de défilement, donc lents quand on défile lentement, rapprochés et plus appuyés quand on défile vite.
@@ -296,7 +231,7 @@ function ouvrirGrotte() {
   if (!brisure.entrerGrotte()) { window.setTimeout(ouvrirGrotte, 120); return; } // la grotte finit de se préparer
   phase = 'grotte'; parcoursVu = true;
   bloque = false;
-  chemin.sauterY(chemin.yFin);   // la bande 2D est cachée : on se place au début de la grotte
+  chemin.sauterY(chemin.yFin);   // on se place au début de la grotte
   chemin.suspendre(false);
   brisure.definirR(0);
   // Phase 2 (après le saut au début de la grotte, sinon la cible de défilement serait périmée) : même défilement que le chemin (vitesse constante) et 1 s d'arrêt devant chaque pierre runique.
@@ -325,7 +260,7 @@ function retourChemin(apres?: () => void) {
   son.torche(false); suivrePas(false); son.musique('menu', 0.3, 2.5); son.vent(0, 1.5); // retour au chemin : pas de vent
   chemin.maitriser(false); chemin.plancher = null; chemin.ancresFournies = null; chemin.vitesseMaitrise = 650; chemin.arretMs = 1000;
   phase = 'retour';
-  verrouiller(true, chemin.yDuPortail(DERNIER)); // la bande 2D se reforme sous la scène, héros devant le portail
+  verrouiller(true, chemin.yDuPortail(DERNIER)); // on se retrouve devant le portail noir
   brisure.sortirGrotte();
   sequence?.kill();
   sequence = gsap.to(proxy, { q: 0, duration: 2.2, ease: 'power2.inOut', onUpdate: majQ, onComplete: () => { verrouiller(false); phase = 'chemin'; futurVu = true; if (v2 && !reduit) chemin.sauterY(chemin.yPour(POSITIONS_PORTAILS[DERNIER] - SEUIL_PORTAIL_NOIR - 0.025)); reprendreV2(); apres?.(); } });
@@ -334,37 +269,21 @@ function retourChemin(apres?: () => void) {
 /** « Réduire les animations » : on abandonne la scène, le texte prend le relais. */
 function arreterSequence() {
   sequence?.kill(); proxy.q = 0;
-  message.classList.remove('visible');
   brisure?.definirQ(0);
   phase = 'chemin';
   if (bloque) verrouiller(false);
 }
 
-import('./act1/monde').then(async ({ Monde }) => {
-  const m = new Monde();
-  try { await m.init(bandeau); } catch (err) { console.warn('Rendu indisponible, le panneau reste utilisable.', err); return; }
-  monde = m;
-  (window as unknown as { __monde: Monde }).__monde = m;
-  m.surEtatHeros = (etat) => { etatHeros.textContent = etat; };
-  m.surClicPortail = (i) => {
-    if (i === chemin.etat.proche && chemin.etat.devant) entrer(i); else chemin.allerAuPortail(i);
-  };
-  m.app.ticker.add((t) => {
-    const e = chemin.etat;
-    m.dessiner({ p: e.p, vitesse: e.vitesse, reduit, proche: e.proche, devant: e.devant }, t.deltaMS);
-    if (v2Actif && v2) { // Phase 1 V2 : les positions viennent de la scène 3D
-      if (!v2Vol) { majOrbe(e.proche, false, 0, 0); return; }
-      const pr = v2.projeter(e.proche);
-      if (e.devant && pr.visible) invite.style.left = `${pr.x}px`;
-      // Les fenêtres d'information sont FIXES à l'écran (indépendantes de la caméra) : du côté opposé au portail, à une position constante.
-      const W = bandeau.clientWidth, H = bandeau.clientHeight, droite = v2.coteStation(e.proche) < 0;
-      majAutres(e.proche === AUTRES && e.devant && pr.visible);
-      majOrbe(e.proche, e.devant && pr.visible, droite ? W * 0.74 : W * 0.27, H * 0.82); // l'aperçu flotte devant la scène ; il s'efface quand le portail est dépassé
-      return;
-    }
-    if (e.devant) invite.style.left = `${m.xEcranPortail(e.proche, e.p)}px`;
-    majOrbe(e.proche, e.devant, m.xEcranPortail(e.proche, e.p), m.hautPortail);
-  });
+// À chaque image : l'aperçu et la fiche d'un portail se placent d'après la scène 3D.
+gsap.ticker.add(() => {
+  const e = chemin.etat;
+  if (!v2Actif || !v2) { majAutres(false); if (orbe.classList.contains('visible')) majOrbe(e.proche, false, 0, 0); return; }
+  if (!v2Vol) { majOrbe(e.proche, false, 0, 0); return; }
+  const pr = v2.projeter(e.proche);
+  // Les fenêtres d'information sont FIXES à l'écran (indépendantes de la caméra) : du côté opposé au portail, à une position constante.
+  const W = bandeau.clientWidth, H = bandeau.clientHeight, droite = v2.coteStation(e.proche) < 0;
+  majAutres(e.proche === AUTRES && e.devant && pr.visible);
+  majOrbe(e.proche, e.devant && pr.visible, droite ? W * 0.74 : W * 0.27, H * 0.82); // l'aperçu flotte devant la scène ; il s'efface quand le portail est dépassé
 });
 
 // ---------- Bouton son
@@ -373,7 +292,7 @@ const majBtnSon = () => { btnSon.setAttribute('aria-pressed', String(!son.active
 majBtnSon(); son.surChangement(majBtnSon);
 btnSon.addEventListener('click', () => { son.basculer(); });
 
-// ---------- Écran d'arrivée (yeux fermés) : « Phase 1 » = bandeau 2D ; « Phase 1 V2 » = chute puis vol sur le dragon (version de test).
+// ---------- Écran d'arrivée : « Vivre mon parcours » lance la chute, puis le vol jusqu'aux portails.
 if (!reduit) verrouiller(true, 0);
 const arreterPoussiere = reduit ? () => {} : poussiereAccueil(intro);
 const NOMS_PIERRES = ['Qui je suis ?', 'Parcours', 'Outils', 'Méthode', 'Contact'];
@@ -406,14 +325,16 @@ $('btn-phase1v2').addEventListener('click', async () => {
     await p2.demarrer();
     v2Vol = true; verrouiller(false); chemin.recaler(); indiceY = window.scrollY; indiceScroll.classList.add('visible'); // on peut avancer : l'icône de la molette invite à défiler vers le bas
   } catch (err) {
-    console.warn('Phase 1 V2 indisponible, retour à la phase 1.', err);
-    v2Actif = false; v2Charge = false; scene2d.classList.remove('v2-on');
-    intro.classList.remove('parti', 'fondu'); // l'écran d'arrivée reste là : on peut choisir « Phase 1 »
+    console.warn('Le parcours en 3D ne démarre pas sur cet appareil.', err);
+    v2Actif = false; v2Charge = false; scene2d.classList.remove('v2-on', 'v2-chute', 'v2-vol');
+    v2?.masquer(); son.tout(); barreJeu?.cacher(); verrouiller(true, 0);
+    intro.classList.remove('parti', 'fondu'); // l'écran d'arrivée reste là, avec un message et le lien vers la version texte
+    document.getElementById('intro-erreur')?.removeAttribute('hidden');
   }
 });
 function arreterV2() {
   if (!v2) return;
-  if (monde) { monde.capturePerso = null; monde.heros.alpha = 1; monde.heros.definirDessin(null); }
+  if (monde) { monde.capturePerso = null; monde.heros.definirPoses(null); }
   v2.masquer(); v2Actif = false; scene2d.classList.remove('v2-on', 'v2-chute', 'v2-vol'); chemin.aimantDesactive = false; chemin.directAuScroll = false; chemin.ralentirPortails = false; chemin.activerLong(false); chemin.maitriser(false); chemin.seuilAvant = 0.016; chemin.restaurerDefilement();
   if (bloque) verrouiller(false);
   fermerIntro();
@@ -421,7 +342,7 @@ function arreterV2() {
 /** Retour de la grotte : on retrouve le dragon devant le portail noir. */
 function reprendreV2() {
   if (!v2 || reduit) return;
-  if (monde) { monde.capturePerso = null; monde.heros.alpha = 1; monde.heros.definirDessin(null); }
+  if (monde) { monde.capturePerso = null; monde.heros.definirPoses(null); }
   v2.afficher(); v2Actif = true; chemin.maitriser(true); scene2d.classList.add('v2-on');
 }
 
@@ -447,6 +368,7 @@ barre.addEventListener('click', (ev) => {
   if (lien && verrouille && !reduit) { ev.preventDefault(); direVerrou(lien); return; }
   if (!lien || reduit || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
   ev.preventDefault();
+  if (!v2) { direVerrou(lien, "Lance d'abord le parcours"); return; } // rubrique débloquée, mais le parcours de cette visite n'est pas encore lancé : rien à rejoindre
   allerRubrique(lien.dataset.rubrique as string);
 });
 (window as unknown as { __phase: () => unknown }).__phase = () => ({ phase, bloque, cibleRubrique, q: proxy.q });
@@ -483,7 +405,7 @@ function remplirFiche(pr: Projet) {
 }
 $('fp-plus').addEventListener('click', () => { son.jouer('ui_clic', 0.7); const ouvert = fiche.classList.toggle('ouvert'); $('fp-plus').setAttribute('aria-expanded', String(ouvert)); $('fp-plus').textContent = ouvert ? 'Voir moins' : 'Voir plus'; });
 function majOrbe(proche: number, devant: boolean, x: number, haut: number) {
-  const actif = devant && proche < projets.length && phase === 'chemin' && !scene.ouverte;
+  const actif = devant && proche < projets.length && phase === 'chemin';
   if (actif) {
     window.clearTimeout(orbeMasque);
     const pr = projets[proche];
@@ -523,5 +445,4 @@ function majOrbe(proche: number, devant: boolean, x: number, haut: number) {
     orbeMasque = window.setTimeout(() => orbeVideo.pause(), 450);
   }
 }
-orbe.addEventListener('click', () => { if (orbeIndex >= 0) entrer(orbeIndex); });
 (window as unknown as { __sequence: () => unknown }).__sequence = () => sequence;

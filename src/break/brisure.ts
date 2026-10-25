@@ -1,9 +1,9 @@
 // La brisure : à la fin du chemin, l'écran se fissure, tremble, éclate en éclats 3D ; le héros tombe dans le vide.
 // Tout est une fonction de q (0..1, progression du défilement dans la zone de brisure) : on peut revenir en arrière.
-// Trois couches empilées au-dessus de la bande 2D : éclats et particules (Three.js), héros (PixiJS, canevas transparent).
+// Trois couches empilées au-dessus de l'image à briser : éclats et particules (Three.js), héros (PixiJS, canevas transparent).
 import * as THREE from 'three';
 import { Application } from 'pixi.js';
-import type { Monde } from '../act1/monde';
+import type { SourceBrisure } from './source';
 import type { Grotte } from '../act2/grotte';
 import { decouper, type Eclat, type Pt } from './voronoi';
 
@@ -52,7 +52,7 @@ export class Brisure {
   private dernierQFissure = -1;
   private grotte: Grotte | null = null; private grotteEnCours = false; private enGrotte = false;
 
-  constructor(private scene: HTMLElement, private monde: Monde) {}
+  constructor(private scene: HTMLElement, private monde: SourceBrisure) {}
 
   async init() {
     this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
@@ -125,7 +125,7 @@ export class Brisure {
 
   definirR(r: number) { this.grotte?.definirR(r); }
 
-  // ---------- Activation : on fige la bande, on la découpe, on prend le héros
+  // ---------- Activation : on fige l'image, on la découpe, on prend le héros
   private activer() {
     const taille = this.monde.taille;
     if (!taille.largeur) return;
@@ -138,11 +138,8 @@ export class Brisure {
     this.snapTex.generateMipmaps = false; this.snapTex.minFilter = THREE.LinearFilter;
     const h = this.monde.placeHeros;
     this.depart = { x: h.x, y: h.y, hauteur: h.hauteur };
-    this.monde.confierHeros(true);
     this.pixi.stage.addChild(this.monde.heros);
-    this.monde.heros.utiliserRenderer(this.pixi.renderer); // la marionnette se dessine avec le moteur de la scène qui l'affiche
     this.monde.heros.scale.x = 1;
-    this.monde.afficher(false);
     this.construire();
     this.tPrec = performance.now();
     this.boucle = requestAnimationFrame(this.tic);
@@ -156,9 +153,6 @@ export class Brisure {
     const hero = this.monde.heros;
     this.pixi.stage.removeChild(hero);
     hero.pivot.set(0, 0); hero.rotation = 0; hero.scale.set(1);
-    hero.utiliserRenderer(this.monde.app.renderer);
-    this.monde.confierHeros(false);
-    this.monde.afficher(true);
     this.liberer();
     this.flash.style.opacity = '0';
   }
@@ -174,7 +168,7 @@ export class Brisure {
   private construire() {
     const Wv = this.Wv = this.scene.clientWidth, Hv = this.Hv = this.scene.clientHeight;
     this.k = Math.min(1.3, Math.max(0.55, Wv / 1440));
-    const bande = this.monde.taille;           // taille de la bande 2D (px CSS)
+    const bande = this.monde.taille;           // taille de l'écran (px CSS)
     const Wb = bande.largeur, Hb = bande.hauteur;
     const mobile = Wv < 700;
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2));
@@ -199,7 +193,7 @@ export class Brisure {
     this.vide.position.z = -420; this.vide.renderOrder = -2;
     this.scene3.add(this.vide);
 
-    // Éclats : la bande (image sans le héros) découpée en cellules de Voronoï autour des pieds du héros.
+    // Éclats : l'image (le vortex noir) découpée en cellules de Voronoï autour des pieds du héros.
     this.epicentre = [this.depart.x, this.depart.y];
     this.rayonMax = Math.hypot(Math.max(this.epicentre[0], Wb - this.epicentre[0]), Math.max(this.epicentre[1], Hb - this.epicentre[1]));
     const cellules = decouper(Wb, Hb, this.epicentre, mobile ? 26 : 46);
@@ -473,7 +467,6 @@ export class Brisure {
     hero.position.set(x, yPieds - d.hauteur / 2);
     hero.rotation = -0.75 * u + Math.sin(q * 30) * 0.12 * u + Math.sin(tm * 1.7) * 0.1 * u;
     hero.scale.set(1 + 0.18 * u);
-    hero.maj(0, false, false, tm, dt);
     hero.poseChute(0.18 * lisse(0.06, Q_CASSURE, q) + 0.82 * lisse(Q_CASSURE, Q_CASSURE + 0.07, q), tm);
 
     this.renderer.render(this.scene3, this.camera);

@@ -1,4 +1,4 @@
-// Phase 1 V2 (version de test) : on ouvre les yeux en pleine chute dans le ciel des rêves, on s'accroche, puis on vole sur un dragon
+// Début du parcours : on ouvre les yeux en pleine chute dans le ciel des rêves, on s'accroche, puis on vole sur un dragon
 // en suivant le défilement jusqu'aux portails des projets. Tout est provisoire : décor en cartes, dragon en formes simples, mains agitées par le code.
 // Ce module ne gère que l'image et les textes de la scène ; main.ts décide de ce qui se passe avant et après.
 import * as THREE from 'three';
@@ -16,7 +16,6 @@ const COULEURS_PORTAILS = [0, 1, 0, 1, 0, 1, 0];
 const RATIO_INTERIEUR = 0.65; // rayon intérieur de l'anneau / rayon extérieur (mesuré sur les images)
 /** Mouvements de l'anneau runique, en tours (positif = vers la gauche) : [déplacement, durée du mouvement, pause après]. */
 const MOUVEMENTS_ANNEAU: [number, number, number][] = [[0.07, 0.9, 1.0], [-0.25, 1.2, 1.1], [0.5, 1.7, 1.3], [0.25, 1.2, 1.5]];
-const DUREE_PUITS = 3.4; // secondes de chute dans le puits
 const MAINS_TENDUES = true; // `main-droite-1..3.webp` : main droite qui se tend vers l'intérieur puis attrape
 const COTE_PORTAIL = 12.5, RAYON_PORTAIL = 5.5, HAUT_PORTAIL = 9, DECALAGE_DRAGON = 3;
 
@@ -57,9 +56,7 @@ export class PhaseV2 {
   /** Décalage vertical (px) que le balancement de la caméra donne à la scène : la fiche et l'aperçu des portails le suivent. */
   bobPx = 0;
   private poussiere!: THREE.Points; private poussierePos!: Float32Array; private poussiereDer = new THREE.Vector3(); private poussiereInit = false;
-  private mode: 'ferme' | 'chute' | 'vol' | 'puits' = 'ferme';
-  private grpPuits = new THREE.Group(); private puitsCrist: THREE.InstancedMesh | null = null; private puitsDebris: THREE.InstancedMesh | null = null; private puitsLueur!: THREE.Sprite; private puitsLum!: THREE.PointLight;
-  private tPuits = 0; private profondeur = 0; private resolvePuits: (() => void) | null = null; private debris: { x: number; y: number; z: number; s: number; v: number; r: number }[] = [];
+  private mode: 'ferme' | 'chute' | 'vol' = 'ferme';
   private boucle = 0; private tPrec = 0; private temps = 0; private actif = false;
   private lisse: { x: number; y: number } | null = null; private zoom = 0; private coups = 0; private secousse = 0; private plongee = 0;
   private resolvePret: (() => void) | null = null; private tlDemarrage: gsap.core.Timeline | null = null;
@@ -293,7 +290,6 @@ export class PhaseV2 {
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.9));
     const soleil = new THREE.DirectionalLight(0xfff1dc, 1.3); soleil.position.set(-30, 60, 40); this.scene.add(soleil);
     this.construireRelief();
-    this.construirePuits();
     this.construirePoussiere();
     this.construireDragon();
     this.grpVol.visible = false;
@@ -450,21 +446,8 @@ export class PhaseV2 {
       gsap.to(this.noir, { opacity: 1, duration: 0.45, delay: 2.15, ease: 'power1.in', onComplete: () => resolve() });
     });
   }
-  /** Après l'éclair : la 3D disparaît derrière le blanc, qui se dissipe sur la scène 2D (le bandeau se brise ensuite). */
-  fondreVers2D(): Promise<void> {
-    this.canvas.style.display = 'none';
-    return new Promise((resolve) => { gsap.to(this.flash, { opacity: 0, duration: 1.0, ease: 'power1.out', onComplete: () => { this.masquer(); this.canvas.style.display = ''; resolve(); } }); });
-  }
-
-  /** Après un passage par le puits (retour de la phase 2) : on retrouve le chemin tel qu'il était. */
-  private restaurerVol() {
-    if (this.mode !== 'puits') return;
-    this.mode = 'vol'; this.grpPuits.visible = false; this.grpVol.visible = true; this.fond.visible = true; this.mer.visible = true;
-    this.scene.fog = new THREE.Fog(0xf9d3e3, 90, 700); this.renderer.setClearColor(0xf8d4e2, 1); this.camera.fov = 72; this.camera.updateProjectionMatrix();
-    this.mains.forEach((mm) => { mm.style.display = 'none'; }); this.hote.classList.remove('v2-chute'); this.plongee = 0;
-  }
   masquer() { this.noir.style.display = 'none'; this.actif = false; cancelAnimationFrame(this.boucle); this.racine.style.display = 'none'; }
-  afficher() { if (this.mode === 'ferme') return; this.restaurerVol(); this.noir.style.display = 'none'; this.actif = true; this.racine.style.display = 'block'; this.plongee = 0; this.secousse = 0; gsap.set(this.flash, { opacity: 0 }); this.tPrec = performance.now(); this.boucle = requestAnimationFrame(this.tic); }
+  afficher() { if (this.mode === 'ferme') return; this.noir.style.display = 'none'; this.actif = true; this.racine.style.display = 'block'; this.plongee = 0; this.secousse = 0; gsap.set(this.flash, { opacity: 0 }); this.tPrec = performance.now(); this.boucle = requestAnimationFrame(this.tic); }
 
   /** Côté du portail i : -1 gauche, 1 droite, 0 au centre. */
   coteStation(i: number) { return this.cotes[i] ?? 0; }
@@ -550,78 +533,6 @@ export class PhaseV2 {
     this.poussiere.frustumCulled = false; this.poussiere.visible = false; this.scene.add(this.poussiere);
   }
 
-  /** Le puits : on est tombé à travers le portail noir. Un long tube de roche violette et de cristaux qui brillent, des éclats qui filent, une lumière violette tout en bas qui grossit. */
-  private construirePuits() {
-    const r = hasard(1313), LONG = 1100, RAYON = 15;
-    this.grpPuits.visible = false; this.scene.add(this.grpPuits);
-    // Parois : blocs de roche (même géométrie et même texture que la grotte) disposés en anneaux sur toute la hauteur.
-    const blocs: { p: THREE.Vector3; s: number; rot: THREE.Euler; v: number }[] = [];
-    for (let y = 20; y > -LONG; y -= 3.2) {
-      const n = 9 + Math.floor(r() * 3), dec = r() * 6.28;
-      for (let k = 0; k < n; k++) {
-        const a = dec + (k / n) * Math.PI * 2 + (r() - 0.5) * 0.25, rr = RAYON + r() * 5 + Math.sin(y * 0.04 + a * 2) * 2.5;
-        blocs.push({ p: new THREE.Vector3(Math.cos(a) * rr, y + (r() - 0.5) * 2, Math.sin(a) * rr), s: 3.2 + r() * 3.4, rot: new THREE.Euler(r() * 3, r() * 3, r() * 3), v: 0.4 + r() * 0.5 });
-      }
-    }
-    const mat = new THREE.MeshStandardMaterial({ map: this.tex['grotte-roche'], color: 0xb8a8e8, roughness: 0.92, flatShading: true });
-    const rocs = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), mat, blocs.length);
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), c = new THREE.Color(), sc = new THREE.Vector3();
-    blocs.forEach((b, i) => { q.setFromEuler(b.rot); sc.set(b.s, b.s * 1.2, b.s); m.compose(b.p, q, sc); rocs.setMatrixAt(i, m); c.setRGB(b.v, b.v * 0.85, b.v * 1.15); rocs.setColorAt(i, c); });
-    rocs.frustumCulled = false; this.grpPuits.add(rocs);
-    // Cristaux violets lumineux plantés dans les parois, pointe vers l'intérieur.
-    const NC = 260, cm = new THREE.MeshBasicMaterial({ color: 0xc9a4ff });
-    this.puitsCrist = new THREE.InstancedMesh(new THREE.ConeGeometry(0.7, 3.4, 6), cm, NC);
-    for (let i = 0; i < NC; i++) {
-      const y = 10 - r() * (LONG - 40), a = r() * 6.28, rr = RAYON - 1.2, up = new THREE.Vector3(0, 1, 0), dir = new THREE.Vector3(-Math.cos(a), 0.3 * (r() - 0.5), -Math.sin(a)).normalize();
-      q.setFromUnitVectors(up, dir); const k = 0.6 + r() * 1.1; sc.set(k, k, k); m.compose(new THREE.Vector3(Math.cos(a) * rr, y, Math.sin(a) * rr), q, sc); this.puitsCrist.setMatrixAt(i, m);
-    }
-    this.puitsCrist.frustumCulled = false; this.grpPuits.add(this.puitsCrist);
-    // Éclats de pierre et de verre qui filent autour de nous.
-    const ND = 160; this.puitsDebris = new THREE.InstancedMesh(new THREE.TetrahedronGeometry(1, 0), new THREE.MeshBasicMaterial({ color: 0x9d7be8 }), ND);
-    for (let i = 0; i < ND; i++) { const a = r() * 6.28, rr = 2 + r() * (RAYON - 5); this.debris.push({ x: Math.cos(a) * rr, y: -r() * 400, z: Math.sin(a) * rr, s: 0.18 + r() * 0.6, v: 10 + r() * 30, r: r() * 6.28 }); }
-    this.puitsDebris.frustumCulled = false; this.grpPuits.add(this.puitsDebris);
-    // La lumière tout en bas, qui grossit quand on approche.
-    this.puitsLueur = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.disque(), color: 0xa57cff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
-    this.puitsLueur.position.set(0, -LONG + 20, 0); this.puitsLueur.scale.set(120, 120, 1); this.grpPuits.add(this.puitsLueur);
-    this.puitsLum = new THREE.PointLight(0xcdb8ff, 2600, 120, 1.5); this.grpPuits.add(new THREE.AmbientLight(0x6a58a8, 0.7)); this.grpPuits.add(this.puitsLum);
-  }
-
-  /** Chute dans le puits, à travers les yeux du personnage : ses mains devant lui, des parois qui défilent de plus en plus vite, la lumière violette qui grossit. Se résout sur un éclair blanc. */
-  puits(): Promise<void> {
-    return new Promise((resolve) => {
-      this.mode = 'puits'; this.tPuits = 0; this.profondeur = 0; this.resolvePuits = resolve;
-      this.grpVol.visible = false; this.fond.visible = false; this.mer.visible = false; this.grpChute.visible = false; this.grpPuits.visible = true;
-      this.scene.fog = new THREE.Fog(0x05000f, 6, 170); this.renderer.setClearColor(0x05000f, 1);
-      this.camera.fov = 84; this.camera.updateProjectionMatrix();
-      this.mains.forEach((mm) => { mm.style.display = 'block'; }); this.mainsPose(0);
-      this.hote.classList.add('v2-chute'); // masque l'interface du chemin
-      gsap.to(this.noir, { opacity: 0, duration: 0.7, ease: 'power1.out', onComplete: () => { this.noir.style.display = 'none'; } });
-      gsap.set(this.flash, { opacity: 0 });
-    });
-  }
-
-  private imagePuits(dt: number) {
-    this.tPuits += dt; const t = this.tPuits, u = Math.min(1, t / DUREE_PUITS);
-    const vit = 60 + 260 * u * u; this.profondeur += vit * dt;
-    const sx = Math.sin(t * 47) * 0.04 * (0.4 + u), sy = Math.cos(t * 53) * 0.04 * (0.4 + u);
-    this.camera.position.set(sx, -this.profondeur, sy);
-    this.camera.rotation.set(-Math.PI / 2 + Math.sin(t * 0.9) * 0.05, 0, t * 0.35 + Math.sin(t * 1.7) * 0.06, 'YXZ'); // le puits tourne lentement : spirale de la chute
-    this.puitsLum.position.set(0, -this.profondeur - 4, 0); // la lumière descend avec nous, comme la torche de la grotte
-    const k = 120 + 520 * Math.pow(u, 3); this.puitsLueur.scale.set(k, k, 1);
-    (this.puitsLueur.material as THREE.SpriteMaterial).opacity = 0.55 + 0.45 * u;
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), p = new THREE.Vector3(), sc = new THREE.Vector3();
-    this.debris.forEach((d, i) => { // les éclats remontent par rapport à nous et rebouclent plus bas
-      d.y += d.v * dt;
-      if (d.y + this.profondeur > 40) d.y -= 300;
-      e.set(d.r + t, d.r * 2 + t * 1.3, 0); q.setFromEuler(e); p.set(d.x, d.y, d.z); sc.set(d.s, d.s * 1.6, d.s); m.compose(p, q, sc); this.puitsDebris!.setMatrixAt(i, m);
-    });
-    this.puitsDebris!.instanceMatrix.needsUpdate = true;
-    // Mains : elles tremblent de plus en plus.
-    this.mains.forEach((mm, i) => { const s = i ? -1 : 1, tr = Math.sin(t * 9 + i * 2) * 5 * (0.4 + u); mm.style.transform = `scaleX(${s}) translate(${tr.toFixed(1)}px, ${(Math.cos(t * 7 + i) * 4 - u * 20).toFixed(1)}px) rotate(${(Math.sin(t * 5 + i) * 3).toFixed(1)}deg)`; });
-    if (t > DUREE_PUITS - 0.7) gsap.set(this.flash, { opacity: Math.min(1, (t - DUREE_PUITS + 0.7) / 0.7) });
-    if (t >= DUREE_PUITS && this.resolvePuits) { const rr = this.resolvePuits; this.resolvePuits = null; rr(); }
-  }
-
   /** Poids du détour : 0 près d'un portail (le dragon y suit son couloir), 1 entre deux. */
   private libre(p: number) {
     const d = Math.min(...POSITIONS_PORTAILS.map((q) => Math.abs(q - p)));
@@ -659,7 +570,6 @@ export class PhaseV2 {
     const sx = (Math.sin(tm * 61) + Math.sin(tm * 97)) * 0.12 * this.secousse, sy = (Math.cos(tm * 73) + Math.sin(tm * 111)) * 0.1 * this.secousse;
     for (const m of this.portails) m.uniforms.t.value = tm;
     if (this.mode !== 'vol') this.poussiere.visible = false;
-    if (this.mode === 'puits') { this.imagePuits(dt); this.renderer.render(this.scene, this.camera); return; }
     if (this.eauMat && this.eauMat.map) { this.eauMat.map.offset.y = (tm * 0.03) % 1; this.eauMat.map.offset.x = (tm * 0.012) % 1; } // l'eau coule doucement
     for (const f of this.portailsFx) {
       const aspire = 1 + 0.045 * Math.sin(tm * 2.2 + f.phase); // l'intérieur « respire » comme s'il aspirait

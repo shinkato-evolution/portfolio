@@ -192,13 +192,9 @@
       <div class="intro-choix">
         <button type="button" class="bouton-reve" id="btn-phase1v2"><span class="br-etoile" aria-hidden="true"></span><span class="br-texte">Vivre mon parcours</span><span class="br-etoile" aria-hidden="true"></span></button>
       </div>
+      <p class="intro-erreur" id="intro-erreur" hidden>Le parcours en 3D n'a pas pu démarrer sur cet appareil. <a class="lien" href="/lire.html">Lire la version texte</a>.</p>
     </div>
     <div class="bandeau" id="bandeau">
-      <div class="hud-haut" aria-live="polite" aria-atomic="true">
-        <p class="hud-compteur"><span id="hud-compteur">1/7</span> <span class="hud-statut" id="hud-statut"></span></p>
-        <p class="hud-titre" id="hud-titre">Shinkatô — l'application</p>
-        <p class="hud-embleme"><span id="hud-embleme"></span> <span class="hud-phrase" id="hud-phrase"></span></p>
-      </div>
       <div class="orbe" id="orbe" aria-hidden="true"><video id="orbe-video" muted loop playsinline preload="none" tabindex="-1"></video></div>
       <aside class="fiche-portail" id="fiche-portail" aria-hidden="true" data-lenis-prevent>
         <p class="fiche-type"><span id="fp-type"></span> · <span id="fp-statut"></span></p>
@@ -213,14 +209,6 @@
           <p class="fiche-ligne"><b>Tous les outils</b><span id="fp-tous"></span></p>
         </div>
       </aside>
-      <button type="button" class="bouton-carre fleche fleche-g" id="btn-prec" aria-label="Portail précédent">‹</button>
-      <button type="button" class="bouton-carre fleche fleche-d" id="btn-suiv" aria-label="Portail suivant">›</button>
-      <div class="invite" id="invite">
-        <button type="button" class="bouton-entrer" id="btn-entrer">Entrer</button>
-        <span class="invite-aide" aria-hidden="true">ou Entrée</span>
-      </div>
-      <p class="hud-aide">Défiler pour avancer · <kbd>←</kbd> <kbd>→</kbd> portails · <kbd>Entrée</kbd> pour entrer</p>
-      <p class="etat-hero" id="etat-hero" aria-hidden="true">attente</p>
       <section class="autres" id="autres" aria-hidden="true">
         <h2>Et bien d'autres</h2>
         <div class="autres-grille">
@@ -232,24 +220,9 @@
       <div class="recul" id="recul" aria-live="polite"><p>Attention, vous revenez sur vos pas</p><i><b id="recul-jauge"></b></i></div>
       <div class="decouverte" id="decouverte" aria-live="polite"><small>Nouvelle découverte</small><strong id="decouverte-texte"></strong></div>
       <div class="indice-scroll" id="indice-scroll" aria-hidden="true"><span class="is-souris"><i></i></span><span class="is-fleches"></span><em>Fais défiler</em></div>
-      <p class="message-futur" id="message-futur" aria-live="polite">Le futur est rempli de projets…<em>À toi d'en être digne.</em></p>
-      <p class="fin-chemin" id="fin-chemin" aria-hidden="true">Fin du chemin</p>
     </div>
   </div>
 </section>
-
-<dialog class="scene-portail" id="scene-portail" aria-labelledby="scene-titre">
-  <div class="scene-contenu">
-    <p class="scene-compteur" id="scene-compteur"></p>
-    <h2 class="scene-titre" id="scene-titre"></h2>
-    <p class="scene-embleme" id="scene-embleme"></p>
-    <p class="scene-note">Scène provisoire : la scène immersive (vidéo, voix, geste) arrive au jalon J3.</p>
-    <div class="scene-actions">
-      <button type="button" class="bouton-entrer" id="scene-sortir">Sortir du portail</button>
-      <a class="lien" id="scene-fiche" href="#lire">Lire la fiche</a>
-    </div>
-  </div>
-</dialog>
 
 <noscript>
   <section class="bloc">

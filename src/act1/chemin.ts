@@ -33,16 +33,16 @@ export class Chemin {
   private st!: ScrollTrigger;
   private dernierMouvement = performance.now();
   private aimantEnCours = false;
-  /** Vrai : le défilement seul fait avancer, rien n'attire vers les portails (Phase 1 V2). */
+  /** Vrai : le défilement seul fait avancer, rien n'attire vers les portails. */
   aimantDesactive = false;
-  /** Vitesse maximale affichée (part du parcours par seconde) et ralentissement près des portails (Phase 1 V2). */
+  /** Vitesse maximale affichée (part du parcours par seconde) et ralentissement près des portails. */
   vitesseMax = VITESSE_MAX; ralentirPortails = false;
   /** Vrai : la position affichée suit EXACTEMENT le défilement (aucun rattrapage automatique) ; c'est la molette elle-même qui est freinée près des portails. */
   seuilAvant = SEUIL_AVANT;
   directAuScroll = false; arretPortails = false;
   private arrivePortail = -1; private arriveLe = 0; private portailFranchi = -1;
   private pauseAimant = false;
-  /** Défilement allongé (Phase 1 V2) : 2 fois plus de défilement pour le même trajet, et encore 2 fois plus autour de chaque portail. `courbe` = cumul normalisé du poids. */
+  /** Défilement allongé : 2 fois plus de défilement pour le même trajet, et encore 2 fois plus autour de chaque portail. `courbe` = cumul normalisé du poids. */
   private facteur = 1; private courbe: Float32Array | null = null; private poidsTotal = 1;
   private sDe(p: number) { if (!this.courbe) return p; const n = this.courbe.length - 1, x = Math.min(1, Math.max(0, p)) * n, i = Math.min(n - 1, Math.floor(x)); return this.courbe[i] + (this.courbe[i + 1] - this.courbe[i]) * (x - i); }
   private pDe(s: number) { if (!this.courbe) return s; let lo = 0, hi = this.courbe.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (this.courbe[m] < s) lo = m; else hi = m; } const a = this.courbe[lo], b = this.courbe[hi]; return (lo + (b > a ? (s - a) / (b - a) : 0)) / (this.courbe.length - 1); }
@@ -125,7 +125,7 @@ export class Chemin {
     this.verifierAimant();
   };
 
-  // ---------- Défilement maîtrisé (Phase 1 V2) : la molette, le pad, le tactile et les touches ne déplacent plus la page directement ; ils poussent une cible.
+  // ---------- Défilement maîtrisé : la molette, le pad, le tactile et les touches ne déplacent plus la page directement ; ils poussent une cible.
   // La page rejoint la cible à vitesse limitée (très lente près d'un portail) et la cible ne peut jamais être loin devant : un grand coup de molette ne saute rien.
   // Chaque portail (sauf le dernier) est un arrêt : la page s'y fige et ignore la commande pendant 1 s ; il faut ensuite insister pour repartir.
   /** Arrêts fournis de l'extérieur (px de défilement) : en phase 2, les pierres runiques. Sinon, les portails (le dernier excepté). */
@@ -148,11 +148,11 @@ export class Chemin {
     if (performance.now() < this.tenueJusqua) return; // arrêt à un portail : la commande est ignorée un instant
     this.cibleY += dy;
   }
-  private surRoue = (e: WheelEvent) => { if (this.scenePortailOuverte() || (e.target as HTMLElement).closest?.('.fiche-portail')) return; // sur la fiche, la molette la fait défiler elle-même
+  private surRoue = (e: WheelEvent) => { if ((e.target as HTMLElement).closest?.('.fiche-portail')) return; // sur la fiche, la molette la fait défiler elle-même
     e.preventDefault(); e.stopImmediatePropagation(); this.pousser(e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY); };
   private surTouche = (e: KeyboardEvent) => {
     const k = e.key; const delta = k === 'ArrowDown' ? 120 : k === 'ArrowUp' ? -120 : k === 'PageDown' || k === ' ' ? 500 : k === 'PageUp' ? -500 : 0;
-    if (!delta || this.scenePortailOuverte() || (e.target as HTMLElement).closest('button, a, input, textarea, select')) return;
+    if (!delta || (e.target as HTMLElement).closest('button, a, input, textarea, select')) return;
     e.preventDefault(); e.stopImmediatePropagation(); this.pousser(delta);
   };
   private toucheY = 0;
@@ -169,8 +169,7 @@ export class Chemin {
       const panneau = (e.target as HTMLElement).closest('.pierre-texte') as HTMLElement | null, y = e.touches[0].clientY;
       e.preventDefault(); this.cibleY = window.scrollY; if (panneau) panneau.scrollTop += this.toucheY - y; this.toucheY = y; return;
     }
-    if (this.scenePortailOuverte() || (e.target as HTMLElement).closest?.('.fiche-portail.ouvert')) return; e.preventDefault(); const y = e.touches[0].clientY; this.pousser((this.toucheY - y) * 1.3); this.toucheY = y; };
-  private scenePortailOuverte() { return !!document.querySelector('dialog[open]'); }
+    if ((e.target as HTMLElement).closest?.('.fiche-portail.ouvert')) return; e.preventDefault(); const y = e.touches[0].clientY; this.pousser((this.toucheY - y) * 1.3); this.toucheY = y; };
   private avancerMaitrise() {
     const maintenant = performance.now(), dt = Math.min(0.05, (maintenant - this.tDernier) / 1000); this.tDernier = maintenant;
     const pos = window.scrollY;

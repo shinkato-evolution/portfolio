@@ -1,5 +1,5 @@
 // Image du vortex noir (sans dépendance, pour ne pas alourdir le chargement initial).
-/** Image du vortex noir du portail, avec ses spirales violettes : c'est elle que la brisure fissure (on ne voit jamais la bande 2D de la phase 1). */
+/** Image du vortex noir du portail, avec ses spirales violettes : c'est elle que la brisure fissure. */
 export function vortexNoir(largeur: number, hauteur: number, image?: HTMLImageElement | null): HTMLCanvasElement {
   const c = document.createElement('canvas'); c.width = largeur; c.height = hauteur;
   const g = c.getContext('2d')!;
