@@ -115,9 +115,9 @@ img, canvas { display: block; }
 
 /* ---------- Acte 1 : le bandeau remplit tout l'écran sous l'en-tête ---------- */
 .jeu { position: relative; height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100vh - var(--h-barre)); height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100svh - var(--h-barre)); /* 700vh de chemin + 500vh de grotte + 40vh de pause + la scène */ }
-.reduit .jeu { height: calc(700vh + 100vh - var(--h-barre)); height: calc(700vh + 100svh - var(--h-barre)); }
+.reduit .jeu { display: none; } /* animations réduites : le parcours est coupé, on ne laisse pas une scène vide */
 .fin-reduit { display: none; }
-.reduit .fin-reduit { display: block; min-height: 40vh; }
+.reduit .fin-reduit { display: block; min-height: 60vh; padding-top: 48px; }
 .jeu-scene {
   position: sticky; top: var(--h-barre); height: calc(100vh - var(--h-barre)); height: calc(100svh - var(--h-barre));
   display: flex; flex-direction: column; overflow: hidden;

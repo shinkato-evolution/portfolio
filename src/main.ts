@@ -101,13 +101,14 @@ const chemin = new Chemin(section, reduit);
 
 // ---------- Réduire les animations
 const mqReduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+let cacherBarreJeu = () => {}; // branché plus bas, quand la barre du jeu existe (définirReduit tourne avant)
 function definirReduit(oui: boolean, memoriser: boolean) {
   reduit = oui;
   html.classList.toggle('reduit', oui);
   btnReduire?.setAttribute('aria-pressed', String(oui));
   if (btnReduire) btnReduire.textContent = oui ? 'Animations réduites' : 'Réduire les animations';
   chemin.appliquerReduit(oui);
-  if (oui) { arreterSequence(); arreterV2(); verrouille = false; majVerrou(); barreJeu?.cacher(); }
+  if (oui) { arreterSequence(); arreterV2(); verrouille = false; majVerrou(); cacherBarreJeu(); }
   if (memoriser) { try { localStorage.setItem('reduire-animations', oui ? '1' : '0'); } catch { /* stockage indisponible */ } }
 }
 definirReduit(reduit, false);
@@ -308,6 +309,7 @@ const barreJeu = reduit ? null : creerBarreJeu({
     if (phase === 'grotte') retourChemin(() => chemin.allerY(chemin.yArret(i), 2.2)); else chemin.allerY(chemin.yArret(i), 2.2);
   },
 });
+cacherBarreJeu = () => barreJeu?.cacher();
 function fermerIntro() { intro.classList.add('fondu'); window.setTimeout(() => intro.classList.add('parti'), 900); }
 $('btn-phase1v2').addEventListener('click', async () => {
   if (v2Charge || reduit) return;
