@@ -115,9 +115,9 @@ img, canvas { display: block; }
 
 /* ---------- Acte 1 : le bandeau remplit tout l'écran sous l'en-tête ---------- */
 .jeu { position: relative; height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100vh - var(--h-barre)); height: calc((var(--gv, 1250) + var(--cv, 700)) * 1vh + 100svh - var(--h-barre)); /* 700vh de chemin + 500vh de grotte + 40vh de pause + la scène */ }
-.reduit .jeu { display: none; } /* animations réduites : le parcours est coupé, on ne laisse pas une scène vide */
+.reduit .jeu { height: calc(700vh + 100vh - var(--h-barre)); height: calc(700vh + 100svh - var(--h-barre)); }
 .fin-reduit { display: none; }
-.reduit .fin-reduit { display: block; min-height: 60vh; padding-top: 48px; }
+.reduit .fin-reduit { display: block; min-height: 40vh; }
 .jeu-scene {
   position: sticky; top: var(--h-barre); height: calc(100vh - var(--h-barre)); height: calc(100svh - var(--h-barre));
   display: flex; flex-direction: column; overflow: hidden;
@@ -169,9 +169,6 @@ img, canvas { display: block; }
 .texte-legal h2 { font-size: 1.25rem; margin-top: var(--e4); }
 .pied { padding: var(--e3); border-top: 1px solid var(--filet); color: var(--encre-2); font-size: 0.875rem; text-align: center; }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
-}
 .reduit *, .reduit *::before, .reduit *::after { transition-duration: 0.01ms !important; }
 
 /* ---------- Brisure (fin de l'acte 1) ---------- */
@@ -408,7 +405,6 @@ img, canvas { display: block; }
 @keyframes br-balaie { 0%, 55% { left: -40%; } 100% { left: 140%; } }
 @keyframes br-scintille { 0%, 100% { opacity: 0.45; transform: rotate(45deg) scale(0.75); } 50% { opacity: 1; transform: rotate(45deg) scale(1.2); } }
 @keyframes br-respire { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.18); } }
-@media (prefers-reduced-motion: reduce) { .bouton-reve, .bouton-reve::before, .bouton-reve::after, .br-etoile { animation: none; } .intro-texte, .intro-choix { animation: none; opacity: 1; } }
 
 .intro-poussiere { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
 .intro-texte, .intro-choix { position: relative; z-index: 1; }
@@ -477,7 +473,6 @@ html.barre-jeu-on::-webkit-scrollbar { display: none; }
 .indice-scroll em { font: 600 0.6875rem/1 var(--police); font-style: normal; letter-spacing: 0.2em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 8px rgba(30, 10, 80, 0.9); }
 @keyframes is-molette { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(14px); opacity: 0; } 100% { transform: translateY(0); opacity: 0; } }
 @keyframes is-fleche { 0%, 100% { transform: translateY(0) rotate(45deg); opacity: 0.3; } 50% { transform: translateY(5px) rotate(45deg); opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .is-souris i, .is-fleches { animation: none; } }
 
 /* Bouton son : dans le visuel du jeu, en haut à gauche de la barre de parcours (même marge sous l'en-tête) */
 .btn-son { position: fixed; right: 40px; top: calc(var(--h-barre, 90px) + 26px); z-index: 41; display: none; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--or); border-radius: 50%; background: rgba(20, 10, 44, 0.62); color: #fff; cursor: pointer; transition: background 0.2s, transform 0.2s; }

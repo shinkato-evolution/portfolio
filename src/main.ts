@@ -100,7 +100,6 @@ if (pied && 'IntersectionObserver' in window) new IntersectionObserver((es) => {
 const chemin = new Chemin(section, reduit);
 
 // ---------- Réduire les animations
-const mqReduit = window.matchMedia('(prefers-reduced-motion: reduce)');
 let cacherBarreJeu = () => {}; // branché plus bas, quand la barre du jeu existe (définirReduit tourne avant)
 function definirReduit(oui: boolean, memoriser: boolean) {
   reduit = oui;
@@ -113,9 +112,7 @@ function definirReduit(oui: boolean, memoriser: boolean) {
 }
 definirReduit(reduit, false);
 btnReduire?.addEventListener('click', () => definirReduit(!reduit, true));
-mqReduit.addEventListener('change', (e) => {
-  definirReduit(e.matches, false);
-});
+
 
 // ---------- Repères du chemin
 const DERNIER = POSITIONS_PORTAILS.length - 1; // le portail noir

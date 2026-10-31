@@ -23,7 +23,7 @@
     h.classList.remove('no-js'); h.classList.add('js');
     // Le bouton « Réduire les animations » n'existe plus : on oublie l'ancien choix mémorisé et on suit uniquement le réglage du système.
     try { localStorage.removeItem('reduire-animations'); } catch (e) {}
-    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) h.classList.add('reduit');
+    // Le parcours jouable est le cœur du portfolio : il est toujours actif, quel que soit le réglage « Réduire les animations » du système.
   })();
 </script>
 <link rel="stylesheet" href="/src/style.css">
